@@ -14,14 +14,6 @@
   const initial = route();
   let view = $state(initial.view);
   let detailOpen = $state(Boolean(initial.id));
-  let systemDark = $state(matchMedia('(prefers-color-scheme: dark)').matches);
-  let resolvedTheme = $derived(systemDark ? 'dark' : 'light');
-  $effect(() => {
-    const preference = matchMedia('(prefers-color-scheme: dark)');
-    const update = event => { systemDark = event.matches; };
-    preference.addEventListener('change', update);
-    return () => preference.removeEventListener('change', update);
-  });
   let inbox = $state(initialState());
   let query = $state('');
   let phoneFilter = $state(null);
@@ -146,7 +138,7 @@
 <svelte:window onkeydown={keyboard} onpopstate={popstate} />
 <svelte:head><title>{view === 'install' ? 'Install' : 'Messages'} · Sundew</title></svelte:head>
 
-<div class="app" data-theme={resolvedTheme}>
+<div class="app">
   <a class="skip-link" href="#main">Skip to content</a>
   <header class="app-header">
     <a class="wordmark" href="/" onclick={(event) => { event.preventDefault(); navigate('messages'); }}>Sundew<span class="wordmark-period">.</span></a>

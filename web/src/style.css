@@ -22,13 +22,15 @@ h1, h2, h3, p { margin: 0; }
   --shadow: 0 2px 3px #21352603, 0 8px 24px #21352604;
   min-height: 100dvh; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; padding-bottom: 24px;
 }
-.app[data-theme="dark"] {
+@media (prefers-color-scheme: dark) {
+.app {
   color-scheme: dark;
   --bg: #141c18; --surface: #1d2821; --surface-soft: #243128; --text: #e5eee3;
   --muted: #a3b5a6; --line: #304036; --line-strong: #3f5245;
   --accent: #b2d3a3; --accent-soft: #2c3e2d; --selected: #30452f; --button-text: #1b2f20;
   --danger: #efae98; --danger-soft: #3b2d26; --raw-bg: #111a15; --raw-text: #d3e2cf;
   --shadow: 0 2px 3px #0001, 0 8px 24px #0001;
+}
 }
 
 .skip-link { position: absolute; top: -60px; left: 20px; z-index: 30; background: var(--surface); padding: 10px 20px; border: 1px solid var(--accent); }
@@ -106,11 +108,13 @@ h1 { font-size: 29px; font-weight: 660; letter-spacing: -.9px; line-height: 1.25
 .status-sent { color: #3f6481; background: #edf3f8; }
 .status-received { color: #745888; background: #f3edf8; }
 .status-failed { color: #ac493a; background: #fcece6; }
-[data-theme="dark"] .status-delivered { color: #b8dca9; background: #304732; }
-[data-theme="dark"] .status-queued { color: #ead08a; background: #453d25; }
-[data-theme="dark"] .status-sent { color: #accce6; background: #2b3e4b; }
-[data-theme="dark"] .status-received { color: #d3bde7; background: #41354b; }
-[data-theme="dark"] .status-failed { color: #f3b7a7; background: #4a312a; }
+@media (prefers-color-scheme: dark) {
+.status-delivered { color: #b8dca9; background: #304732; }
+.status-queued { color: #ead08a; background: #453d25; }
+.status-sent { color: #accce6; background: #2b3e4b; }
+.status-received { color: #d3bde7; background: #41354b; }
+.status-failed { color: #f3b7a7; background: #4a312a; }
+}
 .row-direction, .direction { display: inline-flex; align-items: center; gap: 4px; color: var(--muted); font-size: 10px; text-transform: capitalize; }
 .row-actions { z-index: 2; display: flex; align-items: center; gap: 4px; position: absolute; bottom: 13px; right: 13px; }
 .raw-button { display: inline-flex; align-items: center; gap: 4px; background: transparent; border: 1px solid transparent; color: var(--muted); border-radius: 5px; padding: 6px; font-size: 10px; height: 30px; }

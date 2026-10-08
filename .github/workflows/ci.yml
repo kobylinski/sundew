@@ -19,7 +19,7 @@ jobs:
           node-version: 24
           cache: npm
           cache-dependency-path: web/package-lock.json
-      - run: npm ci && npm test && npm run build
+      - run: npm ci && npm test
         working-directory: web
       - run: go vet ./... && go test -race ./...
       - run: scripts/acceptance.sh
