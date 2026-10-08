@@ -334,3 +334,78 @@ func TestConcurrentInsertsReadsAndStatusWrites(t *testing.T) {
 		ids[m.ID] = true
 	}
 }
+
+func TestProvidedTimestampsTiesAndDeletedCursor(t *testing.T) {
+	s, _ := open(t)
+	ctx := context.Background()
+	stamp := time.Date(2026, 10, 8, 3, 0, 0, 123, time.FixedZone("test", 7200))
+	updated := stamp.Add(time.Hour)
+	var ids []string
+	for i := range 6 {
+		m := insert(t, s, core.Message{Body: fmt.Sprint(i), CreatedAt: stamp, UpdatedAt: updated})
+		if !m.CreatedAt.Equal(stamp) || !m.UpdatedAt.Equal(updated) {
+			t.Fatal("supplied timestamps overwritten")
+		}
+		ids = append(ids, m.ID)
+	}
+	page, cursor, err := s.List(ctx, core.Filter{Limit: 2})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(page) != 2 || page[0].ID != ids[5] || page[1].ID != ids[4] || cursor == "" {
+		t.Fatal("unstable tie order")
+	}
+	if err := s.Delete(ctx, page[1].ID); err != nil {
+		t.Fatal(err)
+	}
+	// Neither a newer arrival nor deleting the previous page's anchor shifts
+	// the continuation boundary into duplicate or missing old messages.
+	insert(t, s, core.Message{CreatedAt: stamp.Add(time.Second)})
+	remaining, next, err := s.List(ctx, core.Filter{Limit: 500, Cursor: cursor})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(remaining) != 4 || next != "" {
+		t.Fatalf("continuation length %d cursor %q", len(remaining), next)
+	}
+	for i, m := range remaining {
+		if m.ID != ids[3-i] {
+			t.Fatal("deleted cursor introduced gap/duplicate")
+		}
+	}
+	if _, err := s.Latest(ctx, core.Filter{Cursor: "malformed"}); !errors.Is(err, core.ErrInvalidFilter) {
+		t.Fatalf("latest cursor error: %v", err)
+	}
+	if _, err := s.Latest(ctx, core.Filter{Limit: 501}); !errors.Is(err, core.ErrInvalidFilter) {
+		t.Fatalf("latest limit error: %v", err)
+	}
+	zeroUpdated := insert(t, s, core.Message{CreatedAt: stamp})
+	if !zeroUpdated.UpdatedAt.Equal(stamp) {
+		t.Fatal("zero updated timestamp not filled")
+	}
+}
+
+func TestSingleQueryAcrossFieldsAndCombinedFilters(t *testing.T) {
+	s, _ := open(t)
+	ctx := context.Background()
+	for _, m := range []core.Message{
+		{To: "Needle-destination", Provider: "a"}, {From: "Needle-sender", Provider: "a"},
+		{Body: "NEEDLE body", Provider: "a"}, {Account: "needle-account", Provider: "b"},
+		{To: "other", Body: "unrelated", Provider: "a"},
+	} {
+		insert(t, s, m)
+	}
+	for _, tc := range []struct {
+		f    core.Filter
+		want int
+	}{
+		{core.Filter{Query: "needle"}, 4}, {core.Filter{Query: "NEEDLE", Provider: "a"}, 3},
+		{core.Filter{Query: "needle", To: "Needle-destination"}, 1}, {core.Filter{Query: "needle", BodyContains: "body"}, 1},
+		{core.Filter{Query: "missing"}, 0},
+	} {
+		page, _, err := s.List(ctx, tc.f)
+		if err != nil || len(page) != tc.want {
+			t.Fatalf("query %#v: got %d want %d err %v", tc.f, len(page), tc.want, err)
+		}
+	}
+}

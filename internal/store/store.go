@@ -145,11 +145,15 @@ func parseFilter(f core.Filter) (int, *cursor, error) {
 	}
 	return limit, &c, nil
 }
-func matches(m *core.Message, f core.Filter, body string) bool {
+func matches(m *core.Message, f core.Filter, body, query string) bool {
 	return (f.To == "" || m.To == f.To) && (f.From == "" || m.From == f.From) &&
 		(f.Account == "" || m.Account == f.Account) && (f.Provider == "" || m.Provider == f.Provider) &&
 		(f.Since.IsZero() || !m.CreatedAt.Before(f.Since)) &&
-		(body == "" || strings.Contains(strings.ToLower(m.Body), body))
+		(body == "" || strings.Contains(strings.ToLower(m.Body), body)) &&
+		(query == "" || strings.Contains(strings.ToLower(m.To), query) ||
+			strings.Contains(strings.ToLower(m.From), query) ||
+			strings.Contains(strings.ToLower(m.Body), query) ||
+			strings.Contains(strings.ToLower(m.Account), query))
 }
 func (s *Store) List(ctx context.Context, f core.Filter) ([]*core.Message, string, error) {
 	limit, after, err := parseFilter(f)
@@ -159,6 +163,7 @@ func (s *Store) List(ctx context.Context, f core.Filter) ([]*core.Message, strin
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	items := make([]*core.Message, 0, limit)
+	body, query := strings.ToLower(f.BodyContains), strings.ToLower(f.Query)
 	var last entry
 	for _, e := range s.ordered {
 		if err := ctx.Err(); err != nil {
@@ -167,7 +172,7 @@ func (s *Store) List(ctx context.Context, f core.Filter) ([]*core.Message, strin
 		if after != nil && (e.message.CreatedAt.After(after.Created) || (e.message.CreatedAt.Equal(after.Created) && e.seq >= after.Seq)) {
 			continue
 		}
-		if !matches(e.message, f, strings.ToLower(f.BodyContains)) {
+		if !matches(e.message, f, body, query) {
 			continue
 		}
 		if len(items) == limit {

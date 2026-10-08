@@ -3,7 +3,13 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 run_dir=$(mktemp -d "${TMPDIR:-/tmp}/sundew-acceptance.XXXXXX")
-export SUNDEW_TEST_PROJECT="sundew-$(date +%s)-$$-${RANDOM}"
+lane="${SUNDEW_TEST_LANE:-b099379f}"
+if [[ ! $lane =~ ^[a-z0-9]+$ ]]; then
+  echo "SUNDEW_TEST_LANE must contain only lowercase letters and digits" >&2
+  rm -rf "$run_dir"
+  exit 1
+fi
+export SUNDEW_TEST_PROJECT="sundew-${lane}-$(date +%s)-$$-${RANDOM}"
 export SUNDEW_TEST_NETWORK="${SUNDEW_TEST_PROJECT}_default"
 export SUNDEW_TEST_IMAGE="sundew-acceptance:${SUNDEW_TEST_PROJECT}"
 export SUNDEW_TEST_CLIENT_IMAGE="python:3.14-alpine"
@@ -25,9 +31,13 @@ cleanup() {
     done <<< "$containers"
   fi
   docker compose -p "$SUNDEW_TEST_PROJECT" -f "$SUNDEW_TEST_COMPOSE" down --volumes --remove-orphans >&2 || result=1
-  docker image rm "$SUNDEW_TEST_IMAGE" >/dev/null 2>&1 || true
+  if docker image inspect "$SUNDEW_TEST_IMAGE" >/dev/null 2>&1; then
+    docker image rm "$SUNDEW_TEST_IMAGE" >/dev/null || result=1
+  fi
   if [[ $client_was_present == false ]]; then
-    docker image rm "$SUNDEW_TEST_CLIENT_IMAGE" >/dev/null 2>&1 || true
+    if docker image inspect "$SUNDEW_TEST_CLIENT_IMAGE" >/dev/null 2>&1; then
+      docker image rm "$SUNDEW_TEST_CLIENT_IMAGE" >/dev/null || result=1
+    fi
   fi
   rm -rf "$run_dir"
   exit "$result"
