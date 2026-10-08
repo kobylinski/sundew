@@ -55,7 +55,12 @@ trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 
-docker build -t "$SUNDEW_TEST_IMAGE" .
+docker build --platform linux/amd64 --build-arg "VERSION=${VERSION:-dev}" -t "$SUNDEW_TEST_IMAGE" .
+actual_version=$(docker run --rm --label "com.docker.compose.project=$SUNDEW_TEST_PROJECT" "$SUNDEW_TEST_IMAGE" --version)
+if [[ $actual_version != "${VERSION:-dev}" ]]; then
+  echo "Image version is $actual_version; expected ${VERSION:-dev}" >&2
+  exit 1
+fi
 size=$(docker image inspect --format '{{.Size}}' "$SUNDEW_TEST_IMAGE")
 if (( size >= 30000000 )); then
   echo "Image is $size bytes; expected under 30 MB" >&2
