@@ -124,7 +124,7 @@ func (e *engine) deliver(ctx context.Context, m core.Message) {
 		if ctx.Err() != nil {
 			return
 		}
-		// A dropped delete/reset event must still prevent a later delivery.
+		// Recheck storage when waking: a delete/reset cancellation may still be queued.
 		if _, err := e.deps.Store.Get(ctx, m.ID); err != nil {
 			return
 		}

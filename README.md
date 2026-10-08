@@ -84,7 +84,7 @@ It streams SSE events named `message.created`, `message.updated`, `message.delet
 and `store.reset`; each `data:` is a JSON event containing its message (except reset).
 The same filters apply, and reset always reaches every subscriber. A comment
 heartbeat arrives every 15 seconds. The stream has no replay; reconnect and query
-the store if your client falls behind or disconnects.
+the store after a disconnect. Connected subscribers receive events in publication order.
 
 Use `POST /api/v1/reset` in test setup, `DELETE /api/v1/messages` to delete all,
 or `DELETE /api/v1/messages/{id}` to delete one. Success returns 204. Reset and
