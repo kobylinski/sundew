@@ -2,6 +2,7 @@ package bus_test
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"testing"
 	"time"
@@ -41,21 +42,21 @@ func TestFanoutAndCancellation(t *testing.T) {
 	b.Publish(core.Event{Type: "after"})
 }
 
-func TestSlowSubscriberDoesNotBlockOthers(t *testing.T) {
+func TestSlowSubscriberLosesNothingAndDoesNotBlockOthers(t *testing.T) {
 	b := bus.New()
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	slow := b.Subscribe(ctx)
 	done := make(chan struct{})
 	go func() {
-		for range 10000 {
-			b.Publish(core.Event{Type: "flood"})
+		for i := range 10000 {
+			b.Publish(core.Event{Type: fmt.Sprint(i)})
 		}
 		close(done)
 	}()
 	select {
 	case <-done:
-	case <-time.After(time.Second):
+	case <-time.After(2 * time.Second):
 		t.Fatal("publish blocked on slow subscriber")
 	}
 	fast := b.Subscribe(ctx)
@@ -68,8 +69,41 @@ func TestSlowSubscriberDoesNotBlockOthers(t *testing.T) {
 	case <-time.After(time.Second):
 		t.Fatal("fast subscriber stalled")
 	}
-	if len(slow) == 0 || len(slow) >= 10000 {
-		t.Fatal("expected bounded backlog and dropped events")
+	deadline := time.After(3 * time.Second)
+	for i := range 10001 {
+		want := fmt.Sprint(i)
+		if i == 10000 {
+			want = "fresh"
+		}
+		select {
+		case e := <-slow:
+			if e.Type != want {
+				t.Fatalf("event %d: got %q want %q", i, e.Type, want)
+			}
+		case <-deadline:
+			t.Fatalf("lost event at %d", i)
+		}
+	}
+}
+
+func TestCancelSlowSubscriberWithQueuedEvents(t *testing.T) {
+	b := bus.New()
+	ctx, cancel := context.WithCancel(context.Background())
+	ch := b.Subscribe(ctx)
+	for range 10000 {
+		b.Publish(core.Event{})
+	}
+	cancel()
+	deadline := time.After(time.Second)
+	for {
+		select {
+		case _, ok := <-ch:
+			if !ok {
+				return
+			}
+		case <-deadline:
+			t.Fatal("queued events prevented cancellation")
+		}
 	}
 }
 
