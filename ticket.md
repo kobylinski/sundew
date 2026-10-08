@@ -4,9 +4,9 @@ assignees:
 created_at: 2026-10-08T03:37:44.368737+00:00
 id: 71faaaf3455634f5
 labels: []
-status: in_progress
+status: done
 title: 'Twilio façade: send, fetch, auth, status and inbound webhook shapes'
-updated_at: 2026-10-08T03:37:56.031368+00:00
+updated_at: 2026-10-08T04:32:48.415669+00:00
 ---
 ## Outcome
 
