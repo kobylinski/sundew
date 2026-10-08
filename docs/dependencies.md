@@ -8,9 +8,24 @@ Messages are kept in memory, as decided in
 No SQLite driver is required.
 
 Build/test infrastructure uses the official `golang:1.26-alpine` build image,
-`python:3.14-alpine` for isolated HTTP acceptance clients, `actions/checkout@v4`, and
-`actions/setup-go@v5`. None ships in the scratch runtime image. Future third-party Go modules
+`python:3.14-alpine` for isolated HTTP acceptance clients and the actions listed below.
+None ships in the scratch runtime image. Future third-party Go modules
 must have an upstream commit within six months when added, with its date and source recorded here.
+
+## GitHub Actions and workflow linting
+
+Checked on **2026-10-08** against the upstream GitHub repository APIs. CI and release
+use the same full SHA pins and retain the existing action major versions. Maintenance
+means repository activity within six months; the pinned release itself may be older.
+
+| Dependency | Version and pin | Latest upstream commit at check |
+| --- | --- | --- |
+| [actions/checkout](https://github.com/actions/checkout) | v4.4.0, `11d5960a326750d5838078e36cf38b85af677262` (2026-07-16) | [2026-07-20](https://github.com/actions/checkout/commit/f548e57e544e1ff5a4c46bf1e1b8685f8e4a348a) — within six months |
+| [actions/setup-go](https://github.com/actions/setup-go) | v5.6.0, `40f1582b2485089dde7abd97c1529aa768e1baff` (2025-12-15) | [2026-09-28](https://github.com/actions/setup-go/commit/90ad2b35f69faf97585ad74d28fa006d2739b7af) — within six months |
+| [rhysd/actionlint](https://github.com/rhysd/actionlint) | v1.7.12 container, local verification only | [2026-04-19](https://github.com/rhysd/actionlint/commit/011a6d15e749bb3f2d771eed9c7aa0e7e3e10ee7) — within six months |
+
+The release workflow uses the hosted runner's Docker CLI/Buildx and an isolated
+BuildKit builder. It introduces no Docker action or application module.
 
 ## Twilio SDK acceptance
 

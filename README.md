@@ -23,13 +23,32 @@ Provider façades, the query API and UI are being built. See the
 
 ## Run it
 
-Build and run from this checkout:
+Run a published version (replace `<namespace>` and `<version>` with the Docker Hub
+repository and release version configured by your operator):
 
 ```sh
-docker build -t sundew:dev .
-docker run --rm -p 8025:8025 sundew:dev
+docker run --rm -p 8025:8025 <namespace>/sundew:<version>
 curl http://localhost:8025/healthz
 ```
+
+For an application using Compose:
+
+```yaml
+services:
+  sundew:
+    image: <namespace>/sundew:<version>
+    ports:
+      - "8025:8025"
+  app:
+    image: <your-application-image>
+    environment:
+      TWILIO_API_BASE: http://sundew:8025
+```
+
+Set your application's Twilio client base URL from `TWILIO_API_BASE`; Sundew needs
+no real provider credentials. The same network serves the façades, query API and UI.
+See [releasing](docs/releasing.md) for image setup and version tags. To build from
+this checkout instead, run `docker build -t sundew:dev .`.
 
 The health endpoint returns `ok`. Stop with Ctrl-C; SIGTERM drains HTTP requests before exit.
 The runtime image contains one static Go binary and CA certificates; it needs no Node runtime.

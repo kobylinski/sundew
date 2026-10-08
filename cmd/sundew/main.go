@@ -22,7 +22,13 @@ import (
 	"github.com/kobylinski/sundew/internal/store"
 )
 
+var version = "dev"
+
 func main() {
+	if len(os.Args) == 2 && os.Args[1] == "--version" {
+		fmt.Println(version)
+		return
+	}
 	if err := run(); err != nil {
 		log.Print(err)
 		os.Exit(1)
@@ -56,7 +62,7 @@ func run() error {
 	srv := &http.Server{Handler: handler, ReadHeaderTimeout: 5 * time.Second, IdleTimeout: 60 * time.Second, BaseContext: func(net.Listener) context.Context { return ctx }}
 	result := make(chan error, 1)
 	go func() { result <- srv.Serve(listener) }()
-	log.Printf("Sundew listening on %s", listener.Addr())
+	log.Printf("Sundew listening on %s (version %s)", listener.Addr(), version)
 	select {
 	case err := <-result:
 		if !errors.Is(err, http.ErrServerClosed) {
