@@ -12,7 +12,9 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/kobylinski/sundew/internal/api"
 	"github.com/kobylinski/sundew/internal/bus"
+	"github.com/kobylinski/sundew/internal/callback"
 	"github.com/kobylinski/sundew/internal/config"
 	"github.com/kobylinski/sundew/internal/core"
 	"github.com/kobylinski/sundew/internal/provider/twilio"
@@ -41,8 +43,11 @@ func run() error {
 	registrations := []func(*http.ServeMux, core.Deps){
 		// registrations:
 		deps.Providers["twilio"].Register,
+		api.Register,
 		// end registrations
 	}
+	stopCallbacks := callback.Start(ctx, deps)
+	defer stopCallbacks()
 	handler := server.New(deps, registrations)
 	listener, err := net.Listen("tcp", cfg.Addr)
 	if err != nil {

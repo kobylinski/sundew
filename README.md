@@ -62,3 +62,51 @@ in name order and cleans up its containers, network, volumes and image on succes
 Clients run on the same Docker network as Sundew. No host ports or bind mounts are needed;
 `DOCKER_HOST` and Docker contexts work for remote engines too. The health step measures
 startup under one second; the runner requires an image smaller than 30 MB.
+
+## API for tests
+
+The stable JSON API lives at `/api/v1`. Read the newest SMS to a number:
+
+```sh
+curl 'http://localhost:8025/api/v1/messages/latest?to=%2B15551234567'
+```
+
+`GET /api/v1/messages` returns `{"items":[…],"next_cursor":"…"}`, newest first.
+`q` searches to/from/body/account with a case-insensitive substring. Filters combine
+with AND. Filters `to`, `from`, `account` and `provider` match exactly; `body` is a
+case-insensitive substring; `since` is an inclusive RFC 3339 bound on `created_at`.
+Use `limit` (1–500, default 50) and the returned `next_cursor` as `cursor` for the
+next page. URL-encode phone numbers so `+` becomes `%2B`. Read a message by its
+Sundew ID with `GET /api/v1/messages/{id}`. Latest and get return 404 when absent.
+
+Connect to `GET /api/v1/messages/stream` before sending to wait without sleeps.
+It streams SSE events named `message.created`, `message.updated`, `message.deleted`
+and `store.reset`; each `data:` is a JSON event containing its message (except reset).
+The same filters apply, and reset always reaches every subscriber. A comment
+heartbeat arrives every 15 seconds. The stream has no replay; reconnect and query
+the store after a disconnect. Connected subscribers receive events in publication order.
+
+Use `POST /api/v1/reset` in test setup, `DELETE /api/v1/messages` to delete all,
+or `DELETE /api/v1/messages/{id}` to delete one. Success returns 204. Reset and
+delete cancel pending status callbacks for the affected messages.
+
+To simulate an application's inbound SMS webhook:
+
+```sh
+curl -X POST http://localhost:8025/api/v1/inbound \
+  -H 'Content-Type: application/json' \
+  -d '{"from":"+15551234567","to":"+15557654321","body":"STOP","url":"http://app:8000/sms/inbound"}'
+```
+
+`provider` defaults to `twilio`; `account` and `media_urls` are optional. `url`
+overrides `SUNDEW_INBOUND_URL`; one must be configured. A successful delivery
+returns 201 with `{"message":{…},"response_status":204}` (the status is the
+application's actual response). An HTTP rejection is recorded and returned too;
+a connection failure or timeout returns 500. Delivery times out after five seconds
+and does not follow redirects. The generated OpenAPI 3.1 document is served at
+`GET /api/v1/openapi.json`; errors use `{"error":{"code":"…","message":"…"}}`.
+
+For outbound messages carrying a provider status-callback URL, Sundew sends
+`queued`, `sent`, then `delivered`, waiting `SUNDEW_CALLBACK_DELAY` between sends.
+Set `SUNDEW_CALLBACK_OUTCOME=failed` for a final failed webhook with the provider's
+default error code. A failed receiver is logged and the sequence continues.
