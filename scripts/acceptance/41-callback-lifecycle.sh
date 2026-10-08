@@ -7,6 +7,7 @@ set -euo pipefail
 : "${SUNDEW_TEST_CLIENT_IMAGE:?Run scripts/acceptance.sh}"
 receiver="${SUNDEW_TEST_PROJECT}-lifecycle-receiver"
 application="${SUNDEW_TEST_PROJECT}-lifecycle-app"
+callback_delay_seconds=1
 cleanup() {
   result=$?
   trap - EXIT
@@ -21,9 +22,7 @@ trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 
-docker run -d -i --name "$receiver" --network "$SUNDEW_TEST_NETWORK" \
-  --label "com.docker.compose.project=$SUNDEW_TEST_PROJECT" \
-  "$SUNDEW_TEST_CLIENT_IMAGE" python -u - <<'PY' >/dev/null
+receiver_source=$(cat <<'PY'
 import json, threading, urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 records = {}
@@ -54,15 +53,22 @@ class Receiver(BaseHTTPRequestHandler):
         self.wfile.write(payload)
 ThreadingHTTPServer(('0.0.0.0', 8080), Receiver).serve_forever()
 PY
+)
+docker run -d --name "$receiver" --network "$SUNDEW_TEST_NETWORK" \
+  --label "com.docker.compose.project=$SUNDEW_TEST_PROJECT" \
+  "$SUNDEW_TEST_CLIENT_IMAGE" python -u -c "$receiver_source" >/dev/null
 
 docker run -d --name "$application" --network "$SUNDEW_TEST_NETWORK" \
   --label "com.docker.compose.project=$SUNDEW_TEST_PROJECT" \
-  -e SUNDEW_CALLBACK_DELAY=1s "$SUNDEW_TEST_IMAGE" >/dev/null
+  -e "SUNDEW_CALLBACK_DELAY=${callback_delay_seconds}s" "$SUNDEW_TEST_IMAGE" >/dev/null
 
-docker compose -p "$SUNDEW_TEST_PROJECT" -f "$SUNDEW_TEST_COMPOSE" run --rm -T client python - "$receiver" "$application" <<'PY'
+docker compose -p "$SUNDEW_TEST_PROJECT" -f "$SUNDEW_TEST_COMPOSE" run --rm -T client python - "$receiver" "$application" "$callback_delay_seconds" <<'PY'
 import base64, json, sys, time, urllib.error, urllib.parse, urllib.request
 receiver = 'http://' + sys.argv[1] + ':8080'
 base = 'http://' + sys.argv[2] + ':8025'
+callback_delay = float(sys.argv[3])
+# Two transitions would arrive after one and two delays; half a delay adds margin.
+absence_window = 2.5 * callback_delay
 auth = 'Basic ' + base64.b64encode(b'ACreview:invented-review-token').decode()
 def call(host, method, path, form=None):
     data = urllib.parse.urlencode(form).encode() if form is not None else None
@@ -105,7 +111,7 @@ for operation in ['delete', 'reset']:
         call(base, 'DELETE', '/api/v1/messages/' + caught['id'])
     else:
         call(base, 'POST', '/api/v1/reset')
-    assert [row['MessageStatus'][0] for row in records(target, 2, 2.5)] == ['queued']
+    assert [row['MessageStatus'][0] for row in records(target, 2, absence_window)] == ['queued']
     assert call(base, 'GET', '/api/v1/messages')['items'] == []
 
 message = send('/reject')

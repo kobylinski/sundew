@@ -23,10 +23,8 @@ trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 
-# Source travels over stdin: no bind mounts or host ports, including remote engines.
-docker run -d -i --name "$receiver" --network "$SUNDEW_TEST_NETWORK" \
-  --label "com.docker.compose.project=$SUNDEW_TEST_PROJECT" \
-  "$SUNDEW_TEST_CLIENT_IMAGE" python -u - <<'PY' >/dev/null
+# Source travels as a command argument: no bind mounts or host ports, including remote engines.
+receiver_source=$(cat <<'PY'
 import json, threading, time, urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
@@ -53,6 +51,10 @@ class Receiver(BaseHTTPRequestHandler):
         self.wfile.write(data)
 ThreadingHTTPServer(("0.0.0.0", 8080), Receiver).serve_forever()
 PY
+)
+docker run -d --name "$receiver" --network "$SUNDEW_TEST_NETWORK" \
+  --label "com.docker.compose.project=$SUNDEW_TEST_PROJECT" \
+  "$SUNDEW_TEST_CLIENT_IMAGE" python -u -c "$receiver_source" >/dev/null
 for outcome in delivered failed; do
   container="$application"
   [[ $outcome == failed ]] && container="$failed_application"

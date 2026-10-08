@@ -29,9 +29,9 @@ def send(to, body):
 def query(path, **params):
     return call('GET', path + '?' + urllib.parse.urlencode(params))
 
-def error(method, path, status, data=None):
+def error(method, path, status, code, data=None):
     actual, body = call(method, path, data, {'Content-Type': 'application/json'})
-    assert actual == status and body['error']['code'] and body['error']['message']
+    assert actual == status and body['error']['code'] == code and body['error']['message']
 
 assert call('POST', '/api/v1/reset')[0] == 204
 sent = [send('+15551000002', 'older Code'), send('+15551000003', 'excluded'),
@@ -54,21 +54,26 @@ while True:
         break
     assert len(ids) < 4
 assert ids == [message['sid'] for message in reversed(sent)]
-error('GET', '/api/v1/messages?limit=0', 400)
-error('GET', '/api/v1/messages?cursor=malformed', 400)
-error('GET', '/api/v1/messages/latest?since=bad', 400)
-error('GET', '/api/v1/messages/missing', 404)
-error('DELETE', '/api/v1/messages/missing', 404)
-error('PUT', '/api/v1/messages', 405)
-error('POST', '/api/v1/inbound', 400, b'{"provider":"unknown"}')
+error('GET', '/api/v1/messages?limit=0', 400, 'invalid_filter')
+error('GET', '/api/v1/messages?cursor=malformed', 400, 'invalid_filter')
+error('GET', '/api/v1/messages/latest?since=bad', 400, 'invalid_filter')
+error('GET', '/api/v1/messages/missing', 404, 'not_found')
+error('DELETE', '/api/v1/messages/missing', 404, 'not_found')
+error('PUT', '/api/v1/messages', 405, 'method_not_allowed')
+error('POST', '/api/v1/inbound', 400, 'unknown_provider', b'{"provider":"unknown"}')
 
 stream = urllib.request.urlopen(base + '/api/v1/messages/stream?to=%2B15551000002&q=stream', timeout=10)
 assert stream.readline().startswith(b': connected')
 def event(kind):
+    event_name = None
     while True:
         line = stream.readline()
         assert line, 'stream ended before expected event'
+        if line.startswith(b'event:'):
+            event_name = line[6:].strip().decode()
+            assert event_name == kind
         if line.startswith(b'data:'):
+            assert event_name == kind
             value = json.loads(line[5:])
             assert value['type'] == kind
             return value
@@ -78,11 +83,11 @@ created = event('message.created')['message']
 assert created['body'] == 'stream included'
 assert call('DELETE', '/api/v1/messages/' + created['id'])[0] == 204
 assert event('message.deleted')['message']['id'] == created['id']
-error('GET', '/api/v1/messages/' + created['id'], 404)
+error('GET', '/api/v1/messages/' + created['id'], 404, 'not_found')
 assert call('DELETE', '/api/v1/messages')[0] == 204
-assert event('store.reset')['type'] == 'store.reset'
+event('store.reset')
 stream.close()
 assert call('GET', '/api/v1/messages')[1] == {'items': [], 'next_cursor': ''}
-error('GET', '/api/v1/messages/latest', 404)
+error('GET', '/api/v1/messages/latest', 404, 'not_found')
 print('API combined filters/paging/raw capture/errors/SSE delete/reset passed')
 PY
