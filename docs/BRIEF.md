@@ -114,7 +114,6 @@ in favour of this service.
 
 ## Open for Marek
 
-- The GitHub owner the image is published under, and whether Sundew is public from the first
-  commit.
+- ~~The GitHub owner and visibility~~ — decided 8 October: public repository `kobylinski/sundew`, MIT.
 - Whether the first release should also carry Vonage (Caddy Pay or another project may need it).
 - Whether a tiny Polish-market provider (SMSAPI, SerwerSMS) belongs in the provider list.
