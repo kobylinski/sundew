@@ -20,7 +20,9 @@ def error(path, expected, method='GET'):
             return response.headers, payload
     raise AssertionError('expected HTTP error for ' + path)
 class Assets(HTMLParser):
-    paths = []
+    def __init__(self):
+        super().__init__()
+        self.paths = []
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
         path = attrs.get('src') if tag == 'script' else attrs.get('href') if tag == 'link' else None
