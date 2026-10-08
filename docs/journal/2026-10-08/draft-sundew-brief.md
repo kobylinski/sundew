@@ -76,7 +76,8 @@ messages live in memory and are gone when the container stops. No email (Mailpit
   trivial cross-compilation, a standard library HTTP server, an in-memory store, embedded UI
   assets. The UI is a small Svelte application, compiled at build time to static
   assets and embedded; no Node at runtime.
-- **Image:** `ghcr.io/kobylinski/sundew:<version>`, `FROM scratch` or distroless, one port
+- **Image:** published to Docker Hub as `<namespace>/sundew:<version>` by a GitHub Actions
+  workflow on a version tag; `FROM scratch` or distroless, one port
   (default `8025`-style single port for UI, façades and API, with a second optional port for the
   façades only if a consumer needs them separated). Configuration by environment variables:
   `SUNDEW_ADDR`, `SUNDEW_CALLBACK_DELAY`, `SUNDEW_CALLBACK_OUTCOME`, `SUNDEW_INBOUND_URL` (the
@@ -128,6 +129,8 @@ else changes.
 - No persistence, in memory only (`decision-messages-are-kept-in-memory-only.md`).
 - Any credential is accepted; errors come from magic numbers
   (`decision-any-credential-accepted-errors-by-magic-numbers.md`).
+- Images are published to Docker Hub by GitHub Actions
+  (`decision-images-are-published-to-docker-hub-by-github-actions.md`).
 
 ## Open
 
