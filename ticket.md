@@ -4,9 +4,9 @@ assignees:
 created_at: 2026-10-08T08:06:53.392590+00:00
 id: 0771147d2c6234bb
 labels: []
-status: in_progress
+status: done
 title: 'Release workflow: build the image and publish it to Docker Hub from GitHub Actions'
-updated_at: 2026-10-08T08:07:01.139455+00:00
+updated_at: 2026-10-08T08:33:51.013305+00:00
 ---
 ## Outcome
 
