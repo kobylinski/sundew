@@ -82,6 +82,10 @@ func fail(w http.ResponseWriter, status int, code, message string) {
 }
 
 func storeError(w http.ResponseWriter, err error) {
+	if errors.Is(err, core.ErrInvalidFilter) {
+		fail(w, 400, "invalid_filter", "invalid message filter or cursor")
+		return
+	}
 	if errors.Is(err, core.ErrNotFound) {
 		fail(w, 404, "not_found", "message not found")
 		return

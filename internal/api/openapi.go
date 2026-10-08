@@ -82,7 +82,7 @@ func (a *api) document() map[string]any {
 				case "body":
 					description = "Case-insensitive substring"
 				case "limit":
-					s = map[string]any{"type": "integer", "minimum": 1, "maximum": 500}
+					s = map[string]any{"type": "integer", "minimum": 1, "maximum": 500, "default": 50}
 					description = "Page size (list only)"
 				case "cursor":
 					description = "Opaque next_cursor from the preceding page (list only)"

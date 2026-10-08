@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -456,5 +457,17 @@ func TestOpenAPIReflectsRegisteredRoutesAndMessage(t *testing.T) {
 	}
 	if !strings.Contains(r.Header().Get("Content-Type"), "json") {
 		t.Fatal(r.Header())
+	}
+}
+
+func TestInvalidStoreFilterIsBadRequest(t *testing.T) {
+	err := fmt.Errorf("cursor validation: %w", core.ErrInvalidFilter)
+	s := &fakeStore{list: func(core.Filter) ([]*core.Message, string, error) { return nil, "", err }, latest: func(core.Filter) (*core.Message, error) { return nil, err }}
+	for _, path := range []string{"/api/v1/messages?cursor=malformed", "/api/v1/messages/latest?cursor=malformed"} {
+		r := request(handler(s), "GET", path, "")
+		assertError(t, r, 400)
+		if !strings.Contains(r.Body.String(), `"code":"invalid_filter"`) {
+			t.Fatal(r.Body)
+		}
 	}
 }
