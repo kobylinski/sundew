@@ -1,0 +1,6 @@
+.git
+.worktrees
+.codex
+.claude
+node_modules
+**/node_modules
