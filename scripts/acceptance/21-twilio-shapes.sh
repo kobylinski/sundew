@@ -38,9 +38,10 @@ for body, expected in [('a'*160, 1), ('a'*161, 2), ('a'*306, 2), ('a'*307, 3),
     assert status == 200 and fetched['sid'] == message['sid']
     assert fetched['num_segments'] == str(expected)
 
-for auth in [None, 'Bearer invented-review', 'Basic malformed',
-             'Basic ' + base64.b64encode(b'ACreview:invented-review-token').decode()]:
-    assert send('permissive auth', auth)['account_sid'] == account
+for auth, expected_account in [(None, account), ('Bearer invented-review', account),
+                               ('Basic malformed', account),
+                               ('Basic ' + base64.b64encode(b'ACcredential:invented-review-token').decode(), 'ACcredential')]:
+    assert send('permissive auth', auth)['account_sid'] == expected_account
 
 message = send('', MediaUrl=['https://media.invalid/one', 'https://media.invalid/two'])
 assert message['num_media'] == '2' and message['num_segments'] == '0'
