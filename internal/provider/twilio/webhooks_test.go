@@ -111,12 +111,12 @@ func TestSignaturePublicVector(t *testing.T) {
 		t.Fatal(got)
 	}
 	p := New(core.Config{})
-	r, err := p.webhook(context.Background(), "https://invented-user:invented-password@example.com/myapp.php?foo=1&bar=2", "12345", true, f)
+	r, err := p.webhook(context.Background(), "https://invented-user:invented-password@example.com/myapp.php?foo=1&bar=2#client-fragment", "12345", true, f)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if r.Header.Get("X-Twilio-Signature") != "L/OH5YylLD5NRKLltdqwSvS0BnU=" {
-		t.Fatal("userinfo was included in signature")
+		t.Fatal("userinfo or fragment was included in signature")
 	}
 	for _, target := range []string{"http://example.com:8080/hook?x=%2B&y=1", "https://example.com:8443/hook?x=1"} {
 		r, err := p.webhook(context.Background(), target, "12345", true, f)

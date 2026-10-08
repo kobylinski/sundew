@@ -59,6 +59,8 @@ func (p *Provider) webhook(ctx context.Context, target, token string, sign bool,
 	if sign {
 		signedURL := *req.URL
 		signedURL.User = nil
+		signedURL.Fragment = ""
+		signedURL.RawFragment = ""
 		req.Header.Set("X-Twilio-Signature", signature(signedURL.String(), form, token))
 	}
 	return req, nil

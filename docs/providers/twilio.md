@@ -62,7 +62,7 @@ legacy aliases, account, sender, recipient, body, counts and indexed MediaUrl fi
 Status webhooks carry `X-Twilio-Signature` when the original send request used Basic auth. The
 key is the presented token, read from the captured Authorization header. The signature is base64
 HMAC-SHA1 over the full URL plus alphabetically ordered form names and values; the signed URL
-keeps its port and query and excludes userinfo. Without a usable Basic token it is unsigned.
+keeps its port and query and excludes userinfo and the unsent fragment. Without a usable Basic token it is unsigned.
 Inbound input has no originating credential; its webhook is unsigned. Request construction
 performs no network I/O.
 
