@@ -4,9 +4,9 @@ assignees:
 created_at: 2026-10-08T03:37:44.674226+00:00
 id: 735cb76edc3e9ab7
 labels: []
-status: in_progress
+status: closed
 title: Query API, stream, reset, callback engine and inbound simulator
-updated_at: 2026-10-08T03:53:03.321107+00:00
+updated_at: 2026-10-08T04:52:08.962171+00:00
 ---
 ## Outcome
 
