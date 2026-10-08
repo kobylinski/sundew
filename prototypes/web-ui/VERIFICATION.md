@@ -2,7 +2,7 @@
 
 Task: `tasks:40a0d78a850976e8` · Daniel · 8 October 2026.
 
-The q6 revision is implemented: one continuous message report with normal document scrolling, no inspector card or tabs, 14 px body text, one per-message delete location, search aligned with the list, exact phone autocomplete after `+`, and no sort label or inbox footer. The accepted Install content and automatic light/dark themes remain. This candidate awaits operator review; q6 requested changes and is not acceptance of this revision.
+The q6 revision is implemented: one continuous message report with normal document scrolling, no inspector card or tabs, 14 px body text, one per-message delete location, search aligned with the list, exact phone autocomplete after `+`, and no sort label or inbox footer. The accepted Install content and automatic light/dark themes remain. Marek accepted that screen in q7 at 06:05 UTC on 8 October 2026 (`b36400e`). The c15 follow-up to make content links open in a new tab is now also implemented; HTTP-only rendering and the mixed-content fixture follow Ivan’s c17.
 
 This is design evidence on fictional fixtures, not backend or end-to-end acceptance. All code remains under `prototypes/web-ui/`, outside `web/` and `internal/`. No new dependencies were added. Marek’s prototype-only exception in q1 still scopes the [existing dependency audit](../../docs/dependencies.md).
 
@@ -11,17 +11,18 @@ This is design evidence on fictional fixtures, not backend or end-to-end accepta
 Environment: macOS, Node `v24.13.1`, npm `11.8.0`. Commands run from the task worktree:
 
 ```sh
+npm ci --no-audit --no-fund --prefix prototypes/web-ui
 npm run build --prefix prototypes/web-ui
 git diff --check
 ```
 
-Both exited **0**. Vite 8.3.3 compiled 119 modules without warnings: CSS 24.83 kB, JavaScript 74.52 kB (27.98 kB gzip). The rebuilt static preview on port 4280 rendered eight messages and the continuous report, omitted development controls, and produced no browser error logs on the fresh load.
+All exited **0**. Vite 8.3.3 compiled 121 modules without warnings: CSS 25.23 kB, JavaScript 76.61 kB (28.63 kB gzip). The rebuilt static preview on port 4280 rendered eight messages and the continuous report, omitted development controls, and produced no browser error logs on the fresh load.
 
 Development preview: <http://127.0.0.1:4279/>. Static preview: <http://127.0.0.1:4280/>. No existing service was stopped. This revision retains the previous dependency lockfile and base `70856c1`.
 
 ## Current interaction evidence
 
-[report-revision-checks.json](report-revision-checks.json) records **33 focused browser observations, all passed**, using visible controls and read-only DOM inspection. These are observed checks, not an automated test suite.
+[report-revision-checks.json](report-revision-checks.json) records **33 focused browser observations at `b36400e`, all passed**, using visible controls and read-only DOM inspection. These are observed checks, not an automated test suite.
 
 | Area | Observed result |
 | --- | --- |
@@ -38,11 +39,17 @@ Development preview: <http://127.0.0.1:4279/>. Static preview: <http://127.0.0.1
 | Arrivals | An arrival outside an exact phone filter preserved its selected report. A scrolled arrival waited behind Show newest without inserting rows. Show newest returned to the top and focused the inbox heading; the current 100-row page size was retained. |
 | Static build and themes | The rebuilt static preview rendered the report without development controls. Default theme matched the OS. Both explicit palettes were visually inspected. |
 
-The [initial 30 observations](interaction-checks.json) at `a42a337` and [13 earlier refinement observations](refinement-checks.json) at `f705a4e` are historical evidence. Their references to B/C layouts and detail tabs do not describe this candidate. The initial fixture validation covered 280 fixtures and exact `core.Message` fields; the unchanged fixture source was not revalidated in this visual revision.
+The [initial 30 observations](interaction-checks.json) at `a42a337` and [13 earlier refinement observations](refinement-checks.json) at `f705a4e` are historical evidence. Their references to B/C layouts and detail tabs do not describe this candidate. The initial fixture validation covered 280 fixtures and exact `core.Message` fields; the new `links` scenario preserves the same message shape and is exercised in the follow-up checks below.
+
+## Clickable-link follow-up
+
+[link-checks.json](link-checks.json) records **16 focused checks, all passed**, of c15/c17: only the HTTP URL became a link in the mixed body, in both list and report; HTML stayed escaped; invalid callback/media schemes stayed inert. All active links had `_blank`, `noopener` and `noreferrer`. Clicking a body URL opened a separate browser tab and left the message selection unchanged; the temporary tab was closed afterwards. Row selection, Raw navigation, search highlighting within a URL, keyboard link access, return focus and original-text copying remained usable. Linked content wrapped at 390 px without page overflow. The static build also exercised the new fixture.
+
+The row-selection button is separate from its body anchors, avoiding nested interactive elements. No additional dependencies or production code were added. The explicit link request is implemented; q7 is the recorded report-screen acceptance, not a claim that a later screenshot was separately accepted.
 
 ## Screenshots
 
-These are actual browser captures of the q6 revision. Full reports are deliberately taller than the viewport because the document scrolls. The controls in the arrival example are development-only.
+These are actual browser captures of the q6 revision with the requested content links. Full reports are deliberately taller than the viewport because the document scrolls. The controls in the arrival example are development-only.
 
 | Screen | 390 px | 768 px | 1366 px |
 | --- | --- | --- | --- |
@@ -53,6 +60,7 @@ These are actual browser captures of the q6 revision. Full reports are deliberat
 
 Additional captures:
 
+- Mixed content: [phone](screenshots/links-390.png), [desktop](screenshots/links-1366.png).
 - Raw request jump: [phone](screenshots/a-request-390.png), [desktop](screenshots/a-request-1366.png); [response section](screenshots/a-response-1366.png).
 - [Delete-all confirmation under a phone filter](screenshots/delete-all-1366.png).
 - [Empty](screenshots/empty-390.png), [loading](screenshots/loading-390.png), [disconnected](screenshots/offline-390.png), [long report](screenshots/long-390.png).
@@ -66,4 +74,4 @@ No real provider, API, SSE connection or Docker command was exercised. Retry, pa
 
 Semantic markup, focus and keyboard behavior were inspected in Chrome. No real screen reader, touch device, cross-browser run or formal accessibility certification was performed. The OS setting was not changed; initial automatic theme selection was exercised, while the existing live OS-change listener remains code-reviewed evidence.
 
-The lane remains based on `origin/main` at `70856c1`. The earlier dependency-document overlap preserves main’s Go/Twilio records and the scoped Svelte audit. There is no Rosemary gate, following Marek’s instruction. The revised message screen needs operator acceptance before the designer handoff is complete; prior Install and theme decisions do not need to be asked again.
+The lane remains based on `origin/main` at `70856c1`. The earlier dependency-document overlap preserves main’s Go/Twilio records and the scoped Svelte audit. There is no Rosemary gate, following Marek’s instruction. q7 accepts the revised message screen; q4 accepts Install; q5 requests both automatic themes. c15’s link behavior is implemented and verified. No operator question is open. The README and evidence are ready for the Integrator’s handoff to implementation.

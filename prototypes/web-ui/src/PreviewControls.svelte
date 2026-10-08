@@ -13,6 +13,7 @@
     <option value="many">240 messages</option>
     <option value="inbound">Inbound message</option>
     <option value="failed">Failed message</option>
+    <option value="links">Links and plain text</option>
   </select>
   <select aria-label="Preview theme" value={theme} onchange={(event) => ontheme(event.currentTarget.value)}>
     <option value="auto">System theme</option>

@@ -87,7 +87,8 @@ h1 { font-size: 29px; font-weight: 660; letter-spacing: -.9px; line-height: 1.25
 .message-row:hover { background: var(--surface-soft); }
 .message-row.selected { background: var(--selected); }
 .message-row.selected::before { position: absolute; inset: 0 auto 0 0; content: ''; width: 3px; background: var(--accent); }
-.message-hit { width: 100%; border: 0; background: transparent; text-align: left; color: inherit; display: grid; grid-template-columns: 1fr auto; gap: 9px 12px; padding: 19px 20px 17px; }
+.message-hit { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; border: 0; background: transparent; border-radius: inherit; }
+.message-row-content { pointer-events: none; display: grid; grid-template-columns: 1fr auto; gap: 9px 12px; padding: 19px 20px 17px; }
 .row-recipient { display: flex; flex-wrap: wrap; align-items: baseline; gap: 7px; grid-column: 1; }
 .row-recipient strong { font-size: 14px; font-weight: 650; font-variant-numeric: tabular-nums; letter-spacing: .05px; }
 .eyebrow { font-size: 10px; font-weight: 600; letter-spacing: .65px; color: var(--muted); text-transform: uppercase; }
@@ -111,7 +112,7 @@ h1 { font-size: 29px; font-weight: 660; letter-spacing: -.9px; line-height: 1.25
 [data-theme="dark"] .status-received { color: #d3bde7; background: #41354b; }
 [data-theme="dark"] .status-failed { color: #f3b7a7; background: #4a312a; }
 .row-direction, .direction { display: inline-flex; align-items: center; gap: 4px; color: var(--muted); font-size: 10px; text-transform: capitalize; }
-.row-actions { display: flex; align-items: center; gap: 4px; position: absolute; bottom: 13px; right: 13px; }
+.row-actions { z-index: 2; display: flex; align-items: center; gap: 4px; position: absolute; bottom: 13px; right: 13px; }
 .raw-button { display: inline-flex; align-items: center; gap: 4px; background: transparent; border: 1px solid transparent; color: var(--muted); border-radius: 5px; padding: 6px; font-size: 10px; height: 30px; }
 .raw-button:hover { color: var(--accent); background: var(--surface); border-color: var(--line-strong); }
 .icon-button { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; background: transparent; color: var(--muted); border: 1px solid transparent; border-radius: 5px; padding: 5px; }
@@ -155,6 +156,10 @@ dd .icon-button { width: 23px; height: 23px; margin: -3px 0; flex-shrink: 0; }
 .option-list > div { margin: 0 0 10px; }
 .option-list dt { font-family: "SFMono-Regular", Consolas, monospace; font-size: 10px; margin-bottom: 5px; }
 .option-list dd { font-size: 11px; }
+.content-link { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
+.message-row .content-link { position: relative; z-index: 2; pointer-events: auto; }
+.content-link:hover { text-decoration-thickness: 2px; }
+.media-text { display: block; font-size: 11px; overflow-wrap: anywhere; }
 .media-link { display: flex; gap: 6px; align-items: center; font-size: 11px; overflow-wrap: anywhere; color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 3px; }
 .text-danger { display: inline-flex; align-items: center; gap: 7px; font-size: 11px; color: var(--danger); background: transparent; border: 0; border-radius: 5px; padding: 7px 0; }
 .raw-code { margin: 15px 0 16px; background: var(--raw-bg); color: var(--raw-text); padding: 20px; border: 1px solid var(--raw-bg); border-radius: 8px; font-size: 11px; line-height: 1.9; white-space: pre-wrap; overflow-wrap: anywhere; }
@@ -228,7 +233,7 @@ dd .icon-button { width: 23px; height: 23px; margin: -3px 0; flex-shrink: 0; }
   main { --inbox-columns: minmax(365px,.9fr) minmax(0,1.2fr); --inbox-gap: 24px; }
   .app-header { padding: 0 28px; }
   main { padding-left: 28px; padding-right: 28px; }
-  .message-hit { padding-left: 17px; padding-right: 17px; }
+  .message-row-content { padding-left: 17px; padding-right: 17px; }
   .install-layout { grid-template-columns: 230px minmax(0,1fr); gap: 45px; }
 }
 @media (max-width: 999px) {
@@ -264,7 +269,7 @@ dd .icon-button { width: 23px; height: 23px; margin: -3px 0; flex-shrink: 0; }
   .search-field { width: 100%; height: 43px; gap: 8px; padding: 0 10px; }
   .search-field input { font-size: 11px; }
   .search-field kbd { display: none; }
-  .message-hit { padding: 17px 16px 15px; gap: 8px 10px; }
+  .message-row-content { padding: 17px 16px 15px; gap: 8px 10px; }
   .row-recipient strong { font-size: 13px; }
   .row-body { font-size: 13px; line-height: 1.7; }
   .row-meta { gap: 7px; padding-right: 32px; }

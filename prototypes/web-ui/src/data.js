@@ -84,6 +84,13 @@ export function fixtures(scenario = 'standard') {
   if (scenario === 'long') {
     items[0] = makeMessage(1, { body: longBody, segments: 5 });
   }
+  if (scenario === 'links') {
+    items[0] = makeMessage(1, {
+      body: 'Track your parcel at https://example.test/track/6021.\nPlain text: javascript:alert(1)\nHTML fragment: <img src=x onerror=alert(1)>',
+      media_urls: ['https://example.test/media/collection-point.jpg', 'javascript:alert(1)', 'data:text/html,<b>example</b>'],
+      options: { status_callback: 'javascript:alert(1)' },
+    });
+  }
   if (scenario === 'inbound') return [items[2], ...items.filter((m) => m.id !== items[2].id)]
     .map((m, i) => ({ ...m, created_at: new Date(epoch - i * 83000).toISOString(), updated_at: new Date(epoch - i * 83000 + 2000).toISOString() }));
   if (scenario === 'failed') return [items[3], ...items.filter((m) => m.id !== items[3].id)]

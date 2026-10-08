@@ -1,6 +1,8 @@
 <script>
   import Icon from './Icon.svelte';
   import CopyButton from './CopyButton.svelte';
+  import LinkedText from './LinkedText.svelte';
+  import { webHref } from './links.js';
   import { dateTime, rawRequest, rawResponse } from './data.js';
   let { message, onclose, ondelete } = $props();
   let request = $derived(rawRequest(message));
@@ -25,7 +27,7 @@
   </div>
   <section class="message-copy" aria-labelledby="content-heading">
     <h3 id="content-heading" class="section-title">Message content</h3>
-    <p class="message-body">{message.body || 'No text content'}</p>
+    <p class="message-body"><LinkedText text={message.body || 'No text content'} /></p>
     <div class="content-meta"><Icon name="message" size={13} /><span>{message.segments} {message.segments === 1 ? 'segment' : 'segments'}</span>{#if media.length}<span class="content-divider">·</span><span>{media.length} {media.length === 1 ? 'attachment' : 'attachments'}</span>{/if}</div>
   </section>
   {#if message.error_code}
@@ -47,14 +49,18 @@
     <h3>Provider options</h3>
     {#if Object.keys(options).length}
       <dl class="option-list">
-        {#each Object.entries(options) as [key, value]}<div><dt>{key}</dt><dd>{value}</dd></div>{/each}
+        {#each Object.entries(options) as [key, value]}
+          <div><dt>{key}</dt><dd>{#if key === 'status_callback' && webHref(value)}<a class="content-link" href={webHref(value)} target="_blank" rel="noopener noreferrer" aria-label={value + ' (opens in a new tab)'}>{value}</a>{:else}{value}{/if}</dd></div>
+        {/each}
       </dl>
     {:else}<p class="muted">No provider options.</p>{/if}
   </section>
   <section class="detail-section" aria-label="Media URLs">
     <h3>Media URLs <span class="quiet-count">{media.length}</span></h3>
     {#if media.length}
-      {#each media as url}<a class="media-link" href={url} target="_blank" rel="noreferrer">{url}<Icon name="external" size={14} /></a>{/each}
+      {#each media as url}
+        {#if webHref(url)}<a class="media-link" href={webHref(url)} target="_blank" rel="noopener noreferrer" aria-label={url + ' (opens in a new tab)'}>{url}<Icon name="external" size={14} /></a>{:else}<span class="media-text">{url}</span>{/if}
+      {/each}
     {:else}<p class="muted">No media attached.</p>{/if}
   </section>
   <section class="detail-section" aria-labelledby="request-heading">

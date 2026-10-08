@@ -9,7 +9,7 @@
   import { fixtures, makeMessage } from './data.js';
 
   const params = new URLSearchParams(location.search);
-  const allowedStates = ['standard', 'loading', 'empty', 'offline', 'long', 'many', 'inbound', 'failed'];
+  const allowedStates = ['standard', 'loading', 'empty', 'offline', 'long', 'many', 'inbound', 'failed', 'links'];
   const initialScenario = allowedStates.includes(params.get('state')) ? params.get('state') : 'standard';
   const initialMessages = fixtures(initialScenario);
   const initialQuery = params.get('q') ?? '';
