@@ -4,9 +4,9 @@ assignees:
 created_at: 2026-10-08T08:06:54.928681+00:00
 id: 4f6ecdb55a9238e9
 labels: []
-status: done
+status: closed
 title: 'Production web UI: the accepted design, built in Svelte and embedded in the binary'
-updated_at: 2026-10-08T15:51:17.752352+00:00
+updated_at: 2026-10-08T15:51:19.276894+00:00
 ---
 ## Outcome
 
