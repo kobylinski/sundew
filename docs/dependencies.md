@@ -106,4 +106,5 @@ The twelve older transitive packages remain explicitly listed above with their l
 commit. Marek approved this pinned set for production on **2026-10-08 at 15:38 UTC**, answering
 `tasks:4f6ecdb55a9238e9#q1` with `extend_to_production`. The six-month rule applies to packages
 we choose directly; these older transitive packages are documented exceptions. The earlier
-prototype-only approval remains recorded separately above.
+prototype-only approval remains recorded separately above. See the
+[accepted dependency policy](journal/2026-10-08/decision-dependency-rule-applies-to-directly-chosen-packages.md).
