@@ -4,9 +4,9 @@ assignees:
 created_at: 2026-10-08T03:37:43.945391+00:00
 id: b099379fbbff6b1d
 labels: []
-status: in_progress
+status: done
 title: 'Foundation: binary, config, store, bus, server, image and acceptance runner'
-updated_at: 2026-10-08T03:37:55.145691+00:00
+updated_at: 2026-10-08T04:23:01.615843+00:00
 ---
 ## Outcome
 
