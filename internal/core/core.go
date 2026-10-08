@@ -71,9 +71,12 @@ type Message struct {
 	UpdatedAt  time.Time         `json:"updated_at"`
 }
 
-// Filter selects messages. Zero values do not filter. To, From, Account and
-// Provider match exactly; BodyContains is a case-insensitive substring.
+// Filter selects messages. Zero values do not filter and set fields combine
+// with AND. To, From, Account and Provider match exactly; BodyContains is a
+// case-insensitive substring; Query is a case-insensitive substring matched
+// against To, From, Body and Account, any one of which may contain it.
 type Filter struct {
+	Query        string // the UI's single search field; `q` in the query API
 	To           string
 	From         string
 	BodyContains string
