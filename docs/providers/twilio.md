@@ -10,7 +10,7 @@ Public references read **2026-10-08**; no Twilio account or real credential was 
 | [Security](https://www.twilio.com/docs/usage/security) | Form webhook signing algorithm and published test vector. |
 | [SMS length](https://www.twilio.com/docs/glossary/what-sms-character-limit), [GSM-7](https://www.twilio.com/docs/glossary/what-is-gsm-7-character-encoding), [UCS-2](https://www.twilio.com/docs/glossary/what-is-ucs-2-character-encoding) | Segment limits and encoding. |
 | [21604](https://www.twilio.com/docs/api/errors/21604), [21603](https://www.twilio.com/docs/api/errors/21603), [21602](https://www.twilio.com/docs/api/errors/21602) | Missing recipient, sender and content. |
-| [20404](https://www.twilio.com/docs/api/errors/20404) | Unknown resource errors. |
+| [20404](https://www.twilio.com/docs/api/errors/20404), [20004](https://www.twilio.com/docs/api/errors/20004) | Unknown resources and unsupported methods. |
 | [Test credentials: SMS magic numbers](https://www.twilio.com/docs/iam/test-credentials#test-sending-an-sms) | Published From/To error triggers. |
 | [30008](https://www.twilio.com/docs/api/errors/30008) | Default simulated failure: unknown delivery error. |
 
@@ -27,7 +27,8 @@ response is captured before the store publishes its creation event; the internal
 not appear in the provider response. Fetch reads the current store status and checks the account namespace. Response links use `Config.BaseURL`, or relative paths when it is empty.
 
 Missing recipient, sender, or content yields HTTP 400 and codes 21604, 21603, or 21602.
-Missing resources yield HTTP 404/code 20404. All errors have `code`, `message`, `more_info`,
+Missing resources yield HTTP 404/code 20404. Unsupported methods yield HTTP 405/code 20004
+with Allow: POST for send, or GET, HEAD for fetch. All errors have `code`, `message`, `more_info`,
 `status`. Every credential is accepted, including missing or malformed authorization. Basic
 username is recorded as Message.Account when present; otherwise the account path is used.
 The entire request headers and body are captured unchanged, including Authorization and Cookie,

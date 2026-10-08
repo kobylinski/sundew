@@ -39,8 +39,25 @@ func New(config core.Config) *Provider { return &Provider{config: config} }
 func (*Provider) Name() string { return "twilio" }
 
 func (p *Provider) Register(mux *http.ServeMux, d core.Deps) {
-	mux.HandleFunc("POST /2010-04-01/Accounts/{account}/Messages.json", func(w http.ResponseWriter, r *http.Request) { p.send(w, r, d) })
-	mux.HandleFunc("GET /2010-04-01/Accounts/{account}/Messages/{message}", func(w http.ResponseWriter, r *http.Request) { p.fetch(w, r, d) })
+	mux.HandleFunc("/2010-04-01/Accounts/{account}/Messages.json", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			methodNotAllowed(w, "POST")
+			return
+		}
+		p.send(w, r, d)
+	})
+	mux.HandleFunc("/2010-04-01/Accounts/{account}/Messages/{message}", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet && r.Method != http.MethodHead {
+			methodNotAllowed(w, "GET, HEAD")
+			return
+		}
+		p.fetch(w, r, d)
+	})
+}
+
+func methodNotAllowed(w http.ResponseWriter, allowed string) {
+	w.Header().Set("Allow", allowed)
+	writeError(w, http.StatusMethodNotAllowed, 20004, "Method not allowed")
 }
 
 func (p *Provider) send(w http.ResponseWriter, r *http.Request, d core.Deps) {

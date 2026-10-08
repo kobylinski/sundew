@@ -346,3 +346,27 @@ func TestSegments(t *testing.T) {
 		})
 	}
 }
+
+func TestUnsupportedMethodsUseProviderErrors(t *testing.T) {
+	for _, tc := range []struct{ method, path, allow string }{
+		{"PUT", "/2010-04-01/Accounts/ACtest/Messages.json", "POST"},
+		{"GET", "/2010-04-01/Accounts/ACtest/Messages.json", "POST"},
+		{"DELETE", "/2010-04-01/Accounts/ACtest/Messages.json", "POST"},
+		{"POST", "/2010-04-01/Accounts/ACtest/Messages/SMunknown.json", "GET, HEAD"},
+		{"PUT", "/2010-04-01/Accounts/ACtest/Messages/SMunknown.json", "GET, HEAD"},
+		{"DELETE", "/2010-04-01/Accounts/ACtest/Messages/SMunknown.json", "GET, HEAD"},
+	} {
+		t.Run(tc.method+tc.path, func(t *testing.T) {
+			// Also mount a UI fallback: it must never swallow facade method errors.
+			mux := http.NewServeMux()
+			New(core.Config{}).Register(mux, core.Deps{Store: &fakeStore{}})
+			mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { t.Error("provider request reached UI fallback") })
+			w := httptest.NewRecorder()
+			mux.ServeHTTP(w, httptest.NewRequest(tc.method, tc.path, nil))
+			checkError(t, w, 405, 20004)
+			if w.Header().Get("Allow") != tc.allow {
+				t.Fatal(w.Header())
+			}
+		})
+	}
+}
