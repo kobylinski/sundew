@@ -1,11 +1,12 @@
 ---
-assignees: []
+assignees:
+- Marek Kobylinski
 created_at: 2026-10-08T08:06:53.392590+00:00
 id: 0771147d2c6234bb
 labels: []
-status: open
+status: in_progress
 title: 'Release workflow: build the image and publish it to Docker Hub from GitHub Actions'
-updated_at: 2026-10-08T08:06:53.392590+00:00
+updated_at: 2026-10-08T08:07:01.139455+00:00
 ---
 ## Outcome
 
