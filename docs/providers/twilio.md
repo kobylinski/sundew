@@ -84,6 +84,10 @@ performs no network I/O.
   Numeric explicit error codes are returned; an error description is supplied only for 30008.
 - ValidityPeriod and unsupported options are captured, not enforced. No telephone-number, media
   reachability, sender ownership, carrier, destination, account-limit or opt-out validation.
+- Media-only messages report `num_segments: "0"`: Sundew counts text units, not MMS billing.
+  The [public NumSegments reference](https://www.twilio.com/docs/messaging/api/message-resource#numsegments-property)
+  says that property is relevant to SMS only and does not specify a media-only create response.
+  Exact MMS counting parity is unverified; zero is an explicit emulator choice, not a Twilio claim.
 - No smart encoding, national shift tables, toll-free-specific multipart limits or MMS accounting.
 - Inbound MediaContentType, geography and carrier metadata cannot be inferred from the input;
   they are omitted. Sundew never fetches media to guess content types.
