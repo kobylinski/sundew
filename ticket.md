@@ -1,11 +1,12 @@
 ---
-assignees: []
+assignees:
+- Marek Kobylinski
 created_at: 2026-10-08T08:06:54.928681+00:00
 id: 4f6ecdb55a9238e9
 labels: []
-status: open
+status: in_progress
 title: 'Production web UI: the accepted design, built in Svelte and embedded in the binary'
-updated_at: 2026-10-08T08:06:54.928681+00:00
+updated_at: 2026-10-08T08:07:03.011397+00:00
 ---
 ## Outcome
 
