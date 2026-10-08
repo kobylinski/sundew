@@ -24,17 +24,18 @@
 
 <section class="message-detail" aria-label="Message details">
   <header class="detail-heading">
-    <div><span class="eyebrow">Caught message</span><h2 tabindex="-1" id="detail-title">{message.to}</h2></div>
+    <div><span class="eyebrow">{message.direction === 'inbound' ? 'Incoming message' : 'Message to'}</span><h2 tabindex="-1" id="detail-title">{message.to}</h2><p class="detail-sender">From <span>{message.from}</span></p></div>
     <button type="button" class="icon-button close-detail" onclick={onclose} aria-label="Back to messages" title="Back to messages"><Icon name="close" /></button>
   </header>
   <div class="detail-intro">
     <span class={'status status-' + message.status}><span class="status-dot"></span>{message.status}</span>
     <span class="direction"><Icon name={message.direction === 'inbound' ? 'incoming' : 'outgoing'} size={14} />{message.direction}</span>
-    <span>{message.provider}</span>
+    <span class="provider-tag">{message.provider}</span>
   </div>
   <div class="detail-tabs" role="tablist" tabindex="-1" aria-label="Message information" onkeydown={tabKeys}>
     {#each tabs as item}
       <button type="button" role="tab" id={'tab-' + item} aria-selected={tab === item} aria-controls={'panel-' + item} tabindex={tab === item ? 0 : -1} onclick={() => onchange(item)}>
+        <Icon name={item === 'message' ? 'message' : item === 'request' ? 'code' : 'response'} size={15} />
         {item === 'message' ? 'Message' : item === 'request' ? 'Raw request' : 'Response'}
       </button>
     {/each}
@@ -42,18 +43,21 @@
 
   <div role="tabpanel" id={'panel-' + tab} aria-labelledby={'tab-' + tab} tabindex="0" class="detail-content">
     {#if tab === 'message'}
-      <div class="body-label"><span class="eyebrow">Text message</span><CopyButton text={message.body} label="Copy text" /></div>
-      <p class="message-body">{message.body || 'No text content'}</p>
+      <div class="message-copy">
+        <div class="body-label"><span class="eyebrow">Message content</span><CopyButton text={message.body} label="Copy text" /></div>
+        <p class="message-body">{message.body || 'No text content'}</p>
+        <div class="content-meta"><Icon name="message" size={13} /><span>{message.segments} {message.segments === 1 ? 'segment' : 'segments'}</span>{#if media.length}<span class="content-divider">·</span><span>{media.length} {media.length === 1 ? 'attachment' : 'attachments'}</span>{/if}</div>
+      </div>
       {#if message.error_code}
         <div class="failure-note"><Icon name="alert" /><div><strong>Delivery failed</strong><p>Provider error code <code>{message.error_code}</code>.</p></div></div>
       {/if}
+      <h3 class="section-title">Message details</h3>
       <dl class="message-metadata">
-        <div><dt>From</dt><dd>{message.from}</dd></div>
-        <div><dt>To</dt><dd>{message.to}</dd></div>
-        <div><dt>Account</dt><dd><code>{message.account}</code></dd></div>
-        <div><dt>Segments</dt><dd>{message.segments}</dd></div>
-        <div><dt>Caught</dt><dd><time datetime={message.created_at}>{dateTime(message.created_at)}</time></dd></div>
-        <div><dt>Updated</dt><dd><time datetime={message.updated_at}>{dateTime(message.updated_at)}</time></dd></div>
+        <div class="metadata-half"><dt>From</dt><dd>{message.from}</dd></div>
+        <div class="metadata-half"><dt>To</dt><dd>{message.to}</dd></div>
+        <div class="metadata-half"><dt>Caught</dt><dd><time datetime={message.created_at}>{dateTime(message.created_at)}</time></dd></div>
+        <div class="metadata-half"><dt>Updated</dt><dd><time datetime={message.updated_at}>{dateTime(message.updated_at)}</time></dd></div>
+        <div><dt>Account</dt><dd><code>{message.account}</code><CopyButton text={message.account} label="Copy account" compact /></dd></div>
         <div><dt>Message ID</dt><dd><code>{message.id}</code><CopyButton text={message.id} label="Copy message ID" compact /></dd></div>
         <div><dt>Provider ID</dt><dd>{#if message.provider_id}<code>{message.provider_id}</code><CopyButton text={message.provider_id} label="Copy provider ID" compact />{:else}<span class="muted">Not recorded</span>{/if}</dd></div>
       </dl>

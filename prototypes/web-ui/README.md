@@ -2,9 +2,9 @@
 
 Task: `tasks:40a0d78a850976e8`. Designer: Daniel. This is a disposable Svelte application on fictional, in-memory fixtures; it makes **no API calls** and sends no SMS. No production application code belongs here.
 
-**Review status:** not yet accepted. The operator must accept the concrete screens and theme before this becomes the implementation handoff. Marek approved the prototype-only dependency exception in `tasks:40a0d78a850976e8#q1`; see [the complete dependency audit](../../docs/dependencies.md).
+**Review status:** Marek selected the split inbox (q2), accepted the inspector content/interactions (q3) and the dedicated Install page (q4), and requested both themes with automatic switching (q5). q2 also requested a more finished visual treatment; that refinement is now implemented and remains to be reviewed. The earlier choices are retained. The prototype-only dependency exception is approved in q1; see [the complete dependency audit](../../docs/dependencies.md).
 
-## Run and compare
+## Run and inspect
 
 ```sh
 cd prototypes/web-ui
@@ -14,19 +14,15 @@ npm run dev
 
 Local URL: <http://127.0.0.1:4279/>. Node is used only to build and serve this prototype. `npm run build` produces static assets in `dist/`; `npm run preview` serves that build on port 4280.
 
-| Candidate | URL | Structural choice |
-| --- | --- | --- |
-| A — split inbox (recommended) | <http://127.0.0.1:4279/?variant=A> | List and inspector together on desktop; a focused detail screen on smaller devices. |
-| B — compact list | <http://127.0.0.1:4279/?variant=B> | Full-width rows for scanning many messages; details open as a separate content view. |
-| C — message stream | <http://127.0.0.1:4279/?variant=C> | A narrow reading stream, larger bodies, and an inspector expanded below the selected message. |
+The selected split inbox is the only layout. [Open the prototype](http://127.0.0.1:4279/) to use the system theme; [force light](http://127.0.0.1:4279/?theme=light) or [force dark](http://127.0.0.1:4279/?theme=dark) for visual review. B/C and the layout switcher have been removed. The original three-way comparison is preserved in commit `f0ff096`.
 
-Use the dark floating **Prototype · mock data** bar to change layout, state, or theme and to simulate an incoming arrival. Left/right arrows also change variants outside editable controls and tab lists. These controls exist only in the development server; they are excluded from the production build. Append `controls=0` for clean screenshots.
+The UI defaults to `prefers-color-scheme` and listens for changes while open. Both palettes are product requirements. A manual theme setting is not proposed: the `theme` override is only a prototype review aid.
 
-All variants use the same fixture shape and local state. `variant`, `state`, `theme`, `view`, `q`, `message`, and `tab` are prototype-only URL parameters; they are not API parameters or the final application's route contract. Reloading resets local deletions and arrivals. No local storage, cookies, accounts, or login is used.
+Use [the optional development controls](http://127.0.0.1:4279/?controls=1) to select a state or simulate an arrival. They are hidden by default and excluded from the static build. `state`, `theme`, `view`, `q`, `message`, and `tab` are prototype-only URL parameters; they are not API parameters or the final application's route contract. Old `variant` links open the selected inbox. Reloading resets local deletions and arrivals. No local storage, cookies, accounts, or login is used.
 
 ## Binding versus illustrative
 
-Nothing here is operator-accepted yet. The following requirements already come from the task and product decisions and remain binding regardless of which candidate is chosen:
+The split layout, inspector content/interactions, dedicated Install page and automatic light/dark themes are operator decisions on q2–q5. The following task requirements remain binding:
 
 - Newest first; recipient, sender, complete body, provider, delivery status and time readable in the list. Long text wraps; it is not silently truncated.
 - One search field matching a substring in recipient, sender, body or account, case-insensitively. Search and live updates do not move keyboard focus.
@@ -36,7 +32,7 @@ Nothing here is operator-accepted yet. The following requirements already come f
 - Svelte compiles to static assets. The real UI talks to the query API only and is embedded in the Go binary. No Node server is required at runtime.
 - Messages are held in memory only; there is no database/volume configuration. Any provider credential is accepted. The install page lists only `SUNDEW_ADDR`, `SUNDEW_BASE_URL`, `SUNDEW_CALLBACK_DELAY`, `SUNDEW_CALLBACK_OUTCOME`, and `SUNDEW_INBOUND_URL`.
 
-Pending visual decisions: the selected layout, light/dark theme, and whether installation guidance remains a dedicated page. Candidate A is my recommendation: it keeps the message body and debugging context visible together without turning the inbox into a dashboard.
+The remaining review concerns the refined visual finish requested in q2. The revision narrows the scanning list, gives the inspector more room, groups the message body and metadata, strengthens typography and navigation, and adds deliberate hover, focus and status treatments. It preserves the accepted fields and actions.
 
 Illustrative: all phone numbers, accounts, message IDs, content, provider responses, error code examples, media URLs and timings. The fixture generator is not a provider emulator or SMS segment calculator. Typography, spacing and colors are review candidates. The arrival control is a review aid, never a proposed product feature. Installation snippets use `<version>` as a release placeholder, not a claim that a release is already published.
 
@@ -44,7 +40,7 @@ Illustrative: all phone numbers, accounts, message IDs, content, provider respon
 
 | State / screen | Reach it | Expected behavior |
 | --- | --- | --- |
-| Normal inbox | `?variant=A` | Eight fictional messages, newest first. Desktop A shows the first message in the inspector; phone/tablet starts with the list. |
+| Normal inbox | `/` | Eight fictional messages, newest first. Desktop shows the first message in the inspector; phone/tablet starts with the list. |
 | Message detail | Click the row, or `?message=msg_0001` | Full text; metadata; provider options; media URLs; delete action. |
 | Raw request | Click **Raw**, or `?message=msg_0001&tab=request` | Method, path/query, all headers, and original body; one Copy request action. |
 | Raw response | Choose Response, or `?message=msg_0001&tab=response` | Captured HTTP status, headers and body; queued creation response can coexist with a later delivered status. |
@@ -59,16 +55,16 @@ Illustrative: all phone numbers, accounts, message IDs, content, provider respon
 | Live arrival | **+ Arrival** in prototype controls | Adds a queued message at the top; preserves selection/focus. When scrolled away, accumulates a Show newest banner until requested. |
 | Delete one / all | Row/detail delete or Delete all | Native dialog, explicit scope, safe initial focus, Escape/Cancel, success announcement. |
 | Installation | Install navigation, or `?view=install` | Docker/Compose, Twilio adapter base URLs, curl example, query API example, five supported environment variables. |
-| Dark theme | Theme button, or `?theme=dark` | All surfaces and status text switch together; illustrative until accepted. |
+| Automatic theme | Default URL, without `theme` | Follows the system light/dark preference and changes with it. Review overrides: `?theme=light` or `?theme=dark`. |
 
-All states can be combined with A/B/C. Raw provider response bodies are preserved as strings and are never regenerated from current status. The inbound fixture deliberately contains an empty `Exchange`; the implementation must render the actual captured data it receives, without assuming every inbound message has a provider façade request.
+All states use the selected split-inbox layout. Raw provider response bodies are preserved as strings and are never regenerated from current status. The inbound fixture deliberately contains an empty `Exchange`; the implementation must render the actual captured data it receives, without assuming every inbound message has a provider façade request.
 
 ## Responsive behavior
 
-- **1366 px:** A has independently scrollable list and inspector with the destination/body visible on both. B has a full-width, column-aligned list and standalone detail. C is a narrow stream with inline expansion. Installation uses an introduction alongside the steps.
-- **768 px:** A becomes list → detail → back, rather than squeezing two unreadable columns. B retains compact rows with metadata rearranged. Installation becomes one column. C keeps inline expansion.
-- **390 px:** Full-width message rows; metadata wraps; every body and raw string wraps without horizontal page scrolling. A/B details occupy the content region. Buttons and native form controls remain usable by touch. The prototype-only bar occupies two compact rows, with bottom padding so it does not hide content.
-- The A breakpoint is 1000 px. General phone styles apply at 600 px. Layout reflow is CSS-driven, not inferred from user-agent strings.
+- **1366 px:** Separately scrollable list and inspector, in roughly 42% / 58% columns with an 18 px gap. The recipient/body stays readable in both. Installation uses an introduction alongside the steps.
+- **768 px:** List → detail → back. The inspector uses the whole content width, and metadata is grouped into readable pairs. Installation becomes one column.
+- **390 px:** Full-width message rows; metadata wraps; every body and raw string wraps without horizontal page scrolling. Detail occupies the content region. The optional review controls fit one bottom row with content padding.
+- The split-layout breakpoint is 1000 px. General phone styles apply at 600 px. Layout reflow is CSS-driven, not inferred from user-agent strings.
 - Installation code is wrapped for reading; Copy still returns the original unwrapped command. The app has no remote fonts, images, icon package, or decorative illustration.
 
 ## Keyboard and screen readers
@@ -76,7 +72,7 @@ All states can be combined with A/B/C. Raw provider response bodies are preserve
 - Skip-to-content link, named navigation, main landmark, one page heading, semantic sections/articles, visible focus outlines, descriptive button labels.
 - `/` focuses search outside editable controls. Escape in a nonempty search clears it. Escape from an open detail returns to the selected row. Standard browser Back moves between Messages and Install.
 - Opening detail places focus on its heading. Closing returns focus to its message row. Deleting, retrying a failed load, and explicitly choosing Show newest return focus to the inbox heading. Automatic arrivals preserve focus.
-- Details use a tablist with one tab stop; Left/Right/Home/End select and focus tabs. Tab moves into the panel and its copy/actions. The prototype's layout arrows never intercept this tablist.
+- Details use a tablist with one tab stop; Left/Right/Home/End select and focus tabs. Tab moves into the panel and its copy/actions.
 - Native `<dialog>` traps focus for delete confirmation. Cancel receives initial focus; Escape dismisses; confirmation announces the result. A changed search is never silently used as the scope of Delete all.
 - Status/direction have text labels as well as color/icons. Icons are hidden from the accessibility tree; Copy announces completion/failure through a polite live region. New arrivals are politely announced without moving focus.
 - Loading skeletons are aria-hidden; their containing state is busy and has one loading announcement. Search results have a separate polite count announcement.
@@ -117,4 +113,4 @@ The install content follows the brief and the accepted Svelte, in-memory-only an
 
 ## Review and delivery
 
-See [VERIFICATION.md](VERIFICATION.md) for build results, screenshots and observed interaction checks. Screenshots and this README describe the candidate that was actually reviewed. Operator acceptance is recorded on the Rosemary task, one screen/decision per question. After selection, remove the discarded variants and review controls before preparing the final implementation reference; do not promote this disposable code directly into `web/`.
+See [VERIFICATION.md](VERIFICATION.md) for build results, screenshots and observed interaction checks. Screenshots and this README describe the candidate that was actually reviewed. Operator acceptance is recorded on the Rosemary task, one screen/decision per question. The rejected layouts and layout-switching controls are removed; state/theme preview controls are development-only and opt-in. Preserve the operator decisions above when implementing, and do not promote this disposable code directly into `web/`. No Rosemary gates are used, following the operator's instruction.

@@ -18,6 +18,8 @@
     outgoing: 'M6 18 18 6 M7 6h11v11',
     external: 'M14 3h7v7 M21 3 10 14 M10 5H3v16h16v-7',
     book: 'M4 3h14a2 2 0 0 1 2 2v16H6a2 2 0 0 1-2-2V3 M4 17h16 M8 7h8 M8 11h5',
+    message: 'M4 4h16v12H9l-5 4V4 M8 8h8 M8 12h5',
+    response: 'M4 5h16v14H4z M8 9l3 3-3 3 M13 15h3',
   };
 </script>
 

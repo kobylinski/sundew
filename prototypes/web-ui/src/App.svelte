@@ -1,21 +1,26 @@
 <script>
-  // PROTOTYPE: three structural alternatives for Sundew's message-review UI.
-  // ?variant=A|B|C. All data and mutations are local; no backend calls are made.
+  // PROTOTYPE: the selected split-inbox design.
+  // All data and mutations are local; no backend calls are made.
   import { tick } from 'svelte';
   import Icon from './Icon.svelte';
-  import VariantA from './VariantA.svelte';
-  import VariantB from './VariantB.svelte';
-  import VariantC from './VariantC.svelte';
+  import Inbox from './Inbox.svelte';
   import Install from './Install.svelte';
-  import PrototypeSwitcher from './PrototypeSwitcher.svelte';
+  import PreviewControls from './PreviewControls.svelte';
   import { fixtures, makeMessage } from './data.js';
 
   const params = new URLSearchParams(location.search);
   const allowedStates = ['standard', 'loading', 'empty', 'offline', 'long', 'many', 'inbound', 'failed'];
   const initialScenario = allowedStates.includes(params.get('state')) ? params.get('state') : 'standard';
   const initialMessages = fixtures(initialScenario);
-  let variant = $state(['A', 'B', 'C'].includes(params.get('variant')) ? params.get('variant') : 'A');
-  let theme = $state(params.get('theme') === 'dark' ? 'dark' : 'light');
+  let theme = $state(['light', 'dark'].includes(params.get('theme')) ? params.get('theme') : 'auto');
+  let systemDark = $state(matchMedia('(prefers-color-scheme: dark)').matches);
+  let resolvedTheme = $derived(theme === 'auto' ? (systemDark ? 'dark' : 'light') : theme);
+  $effect(() => {
+    const preference = matchMedia('(prefers-color-scheme: dark)');
+    const update = (event) => { systemDark = event.matches; };
+    preference.addEventListener('change', update);
+    return () => preference.removeEventListener('change', update);
+  });
   let scenario = $state(initialScenario);
   let view = $state(params.get('view') === 'install' ? 'install' : 'messages');
   let query = $state(params.get('q') ?? '');
@@ -32,7 +37,7 @@
   let cancelButton = $state(null);
   let searchInput = $state(null);
   let serial = 300;
-  const showControls = import.meta.env.DEV && params.get('controls') !== '0';
+  const showControls = import.meta.env.DEV && params.get('controls') === '1';
   let filtered = $derived(messages.filter((message) => [message.to, message.from, message.body, message.account]
     .some((value) => value.toLowerCase().includes(query.trim().toLowerCase()))));
   let items = $derived(filtered.slice(0, limit));
@@ -95,8 +100,7 @@
     document.querySelector('[data-message="' + previousId + '"] .message-hit')?.focus();
   }
   function changeTab(next) { tab = next; remember('tab', next === 'message' ? '' : next); }
-  function setVariant(next) { variant = next; remember('variant', next); }
-  function setTheme(next) { theme = next; remember('theme', next); }
+  function setTheme(next) { theme = next; remember('theme', next === 'auto' ? '' : next); }
   function setScenario(next) {
     view = 'messages';
     remember('view', '');
@@ -184,13 +188,13 @@
 <svelte:window onkeydown={keyboard} onpopstate={popstate} />
 <svelte:head><title>{view === 'install' ? 'Install' : 'Messages'} · Sundew prototype</title></svelte:head>
 
-<div class={'app variant-' + variant} data-theme={theme} class:with-controls={showControls}>
+<div class="app" data-theme={resolvedTheme} class:with-controls={showControls}>
   <a class="skip-link" href="#main">Skip to content</a>
   <header class="app-header">
     <a class="wordmark" href="?view=messages" onclick={(event) => { event.preventDefault(); navigate('messages'); }}>Sundew<span class="wordmark-period">.</span></a>
     <nav aria-label="Main navigation">
-      <a href="?view=messages" aria-current={view === 'messages' ? 'page' : undefined} onclick={(event) => { event.preventDefault(); navigate('messages'); }}>Messages</a>
-      <a href="?view=install" aria-current={view === 'install' ? 'page' : undefined} onclick={(event) => { event.preventDefault(); navigate('install'); }}>Install</a>
+      <a href="?view=messages" aria-current={view === 'messages' ? 'page' : undefined} onclick={(event) => { event.preventDefault(); navigate('messages'); }}><Icon name="inbox" size={16} />Messages</a>
+      <a href="?view=install" aria-current={view === 'install' ? 'page' : undefined} onclick={(event) => { event.preventDefault(); navigate('install'); }}><Icon name="book" size={16} />Install</a>
     </nav>
     <span class="connection" class:offline={isOffline} class:loading={isLoading}><span></span>{isOffline ? 'Disconnected' : isLoading ? 'Connecting' : 'Live'}</span>
   </header>
@@ -241,12 +245,8 @@
           <h2>No matching messages</h2><p>No recipient, sender, message body or account contains “{query}”.</p>
           <button class="button secondary" onclick={clearSearch}>Clear search</button>
         </section>
-      {:else if variant === 'A'}
-        <VariantA {items} {selected} {detailOpen} {tab} {query} {hasMore} onopen={openMessage} onclose={closeMessage} ondelete={askDelete} ontab={changeTab} onload={() => limit += 50} />
-      {:else if variant === 'B'}
-        <VariantB {items} {selected} {detailOpen} {tab} {query} {hasMore} onopen={openMessage} onclose={closeMessage} ondelete={askDelete} ontab={changeTab} onload={() => limit += 50} />
       {:else}
-        <VariantC {items} {selected} {detailOpen} {tab} {query} {hasMore} onopen={openMessage} onclose={closeMessage} ondelete={askDelete} ontab={changeTab} onload={() => limit += 50} />
+        <Inbox {items} {selected} {detailOpen} {tab} {query} {hasMore} onopen={openMessage} onclose={closeMessage} ondelete={askDelete} ontab={changeTab} onload={() => limit += 50} />
       {/if}
       <footer class="app-footer"><span>Messages are kept in memory until Sundew stops.</span><a href="?view=install" onclick={(event) => { event.preventDefault(); navigate('install'); }}>Installation guide<Icon name="arrow" size={13} /></a></footer>
     {/if}
@@ -261,5 +261,5 @@
     <p id="delete-description">{deleteTarget === 'all' ? 'Every caught message will be deleted, including messages not loaded or hidden by search. This cannot be undone.' : 'The message to ' + (deleteTarget?.to ?? '') + ' will be permanently removed from this inbox.'}</p>
     <div class="dialog-actions"><button class="button secondary" bind:this={cancelButton} onclick={() => confirmDialog.close()}>Cancel</button><button class="button danger" onclick={remove}>{deleteTarget === 'all' ? 'Delete all messages' : 'Delete message'}</button></div>
   </dialog>
-  {#if showControls}<PrototypeSwitcher {variant} {theme} {scenario} onvariant={setVariant} ontheme={setTheme} onscenario={setScenario} onarrival={arrive} />{/if}
+  {#if showControls}<PreviewControls {theme} {scenario} ontheme={setTheme} onscenario={setScenario} onarrival={arrive} />{/if}
 </div>

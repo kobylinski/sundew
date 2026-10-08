@@ -2,13 +2,13 @@
 
 Task: `tasks:40a0d78a850976e8` · Daniel · 8 October 2026.
 
-The three Svelte candidates build and run. Browser checks passed on fictional fixtures in Chrome at 390 × 844, 768 × 1024 and 1366 × 900. This is design evidence, not backend or end-to-end acceptance. **The operator has not yet accepted the screens or theme.**
+The selected split-inbox prototype builds and runs. The operator chose A, accepted the inspector and Install page content, and requested automatic light/dark themes in q2–q5. The requested visual refinement is implemented; its final appearance remains to be reviewed. B/C are removed. This is design evidence on fictional fixtures, not backend or end-to-end acceptance.
 
 Marek approved the prototype-only dependency exception in `tasks:40a0d78a850976e8#q1` at 04:27 UTC. The complete lockfile audit is in [docs/dependencies.md](../../docs/dependencies.md); production dependencies are outside that approval.
 
 ## Build
 
-Environment: macOS, Node `v24.13.1`, npm `11.8.0`. From the task worktree, on 8 October at 04:42 UTC:
+Environment: macOS, Node `v24.13.1`, npm `11.8.0`. From the task worktree on 8 October 2026:
 
 ```sh
 npm ci --no-audit --no-fund --prefix prototypes/web-ui
@@ -16,13 +16,13 @@ npm run build --prefix prototypes/web-ui
 git diff --check
 ```
 
-All exited **0**. Vite 8.3.3 transformed 121 modules without compiler warnings. Output: `dist/index.html` 0.58 kB, CSS 27.80 kB, JavaScript 75.27 kB (27.49 kB gzipped). The static build was also opened through `npm run preview` on port 4280: eight fixture rows rendered and the development-only prototype controls were absent. The browser error log returned no entries.
+All exited **0**. The refined design builds with Vite 8.3.3 (119 modules), without compiler warnings. The static build was also opened through `npm run preview` on port 4280: eight fixture rows rendered and the development-only prototype controls were absent. The browser error log returned no entries.
 
 The development preview is <http://127.0.0.1:4279/>. Port 4179 was already occupied, so the prototype uses its own port. No existing service was stopped.
 
 ## Interaction checks
 
-[Recorded browser observations](interaction-checks.json) contain 30 checks. The checks exercise the rendered UI through its controls; they are not a committed automated test suite.
+The [initial browser observations](interaction-checks.json) contain 30 checks of the comparison at `f0ff096`. The [refinement observations](refinement-checks.json) add 13 focused checks after layout consolidation and visual changes: raw copy, tab navigation, system/default themes, responsive edge states, search, deletion focus, staged arrivals and hidden-by-default review controls. All 13 passed. The checks exercise the rendered UI through its controls; they are not a committed automated test suite.
 
 | Area | Observed result |
 | --- | --- |
@@ -45,14 +45,12 @@ Issues found and corrected during verification: an empty CSS import prevented th
 
 ## Responsive screenshots
 
-These are actual browser captures, not generated mockups. Clean captures use `controls=0`; the arrival example retains the development controls to show how it was exercised. Full-page detail/install images are taller than the viewport listed in the column.
+These are actual browser captures of the refined design, not generated mockups. Review controls are hidden by default; the arrival example explicitly enables them to show how it was exercised. Full-page detail/install images are taller than the viewport listed in the column.
 
 | Screen | 390 px | 768 px | 1366 px |
 | --- | --- | --- | --- |
 | A: split inbox | [Phone](screenshots/a-inbox-390.png) | [Tablet](screenshots/a-inbox-768.png) | [Desktop](screenshots/a-inbox-1366.png) |
 | A: message detail | [Phone](screenshots/a-detail-390.png) | [Tablet](screenshots/a-detail-768.png) | [Desktop inspector](screenshots/a-inbox-1366.png) |
-| B: compact list | [Phone](screenshots/b-inbox-390.png) | [Tablet](screenshots/b-inbox-768.png) | [Desktop](screenshots/b-inbox-1366.png) |
-| C: stream | [Phone with inline detail](screenshots/c-detail-390.png) | [Tablet](screenshots/c-inbox-768.png) | [Desktop](screenshots/c-inbox-1366.png) |
 | Installation | [Phone](screenshots/install-390.png) | [Tablet](screenshots/install-768.png) | [Desktop](screenshots/install-1366.png) |
 
 Additional evidence:
@@ -68,6 +66,6 @@ Additional evidence:
 
 No real provider, API, SSE connection or Docker command was exercised by this prototype. Retry, paging, arrival and deletion are local UI demonstrations. The README maps the implementation to the real API, including `q`, cursors, named SSE events, reconnection, null collections and 204 delete responses.
 
-Semantic markup, focus and keyboard behavior were inspected in Chrome. No real screen reader, touch device, cross-browser run or formal accessibility certification was performed. Browser-extension warnings appeared in the shared Chrome environment; no application error was observed.
+Semantic markup, focus and keyboard behavior were inspected in Chrome. No real screen reader, touch device, cross-browser run or formal accessibility certification was performed. Automatic theme selection matched the OS preference; light/dark overrides and returning to System were exercised. The OS setting itself was not changed during this session, so the live OS-change listener was code-reviewed rather than exercised. Browser-extension warnings appeared in the shared Chrome environment; no application error was observed.
 
-All candidate code remains disposable and outside `web/` and `internal/`. Operator screen acceptance is the remaining task requirement. No Rosemary gate has been raised or claimed, following the operator's instruction.
+All prototype code remains disposable and outside `web/` and `internal/`. q2–q5 are answered: layout A, inspector content/interactions, dedicated Install page, and both themes with automatic switching. Review of the visual refinement requested in q2 is the remaining task requirement. No Rosemary gate has been raised or claimed, following the operator's instruction.
