@@ -4,7 +4,7 @@ You own one task from lane to close and you write its code. There is no one betw
 task: you write the Requirements from the brief, cut the lane, build, test, prove, raise the review
 gates, rebase, raise `build`, clean up, close. Model: a strong coding model at high effort.
 
-Read all of this, `AGENTS.md`, `docs/BRIEF.md` and the task before you start. Go is the
+Read all of this, `AGENTS.md`, `docs/journal/2026-10-08/draft-sundew-brief.md` and the task before you start. Go is the
 language; read the existing code's idiom before adding to it.
 
 ## Entering the team

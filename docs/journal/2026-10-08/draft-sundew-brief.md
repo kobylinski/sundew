@@ -1,11 +1,19 @@
+---
+type: journal
+kind: draft
+title: Sundew brief
+status: provisional
+author: Marek Kobylinski
+created: 2026-10-08T05:16:09+0200
+tags: [brief, scope, providers, twilio, acceptance]
+---
+
 # Sundew — brief
 
-Written 8 October 2026 by Adam (Merchant Caddy's Architect) for Marek, who asked for a reusable
-Docker service that catches SMS the way Mailpit catches email, implements the public APIs of
-popular SMS providers so applications need no code change to use it, and offers an API that E2E
-frameworks can read messages from. First consumer: Merchant Caddy's public forms on demand (send a
-form-request link by SMS; `local:7af88e884f141fd1` in that project). Nothing in this brief is
-Merchant Caddy specific.
+A reusable Docker service that catches SMS the way Mailpit catches email. It implements the public
+APIs of popular SMS providers so applications need no code change to use it, and offers an API
+that E2E frameworks can read messages from. This is the product direction until a spec replaces
+it.
 
 ## What it is
 
@@ -21,8 +29,9 @@ One container, one binary, no external dependencies. It listens on one port and 
    request, and any provider options (status callback URL, validity, sender id).
 3. **A web UI** — a list of caught messages, newest first, search by to/from/body/account, a
    message view with the raw request and the provider response Sundew returned, delete one/all,
-   a live update when new messages arrive. Clean, small, no login (it is a dev tool behind a
-   dev gateway), responsive enough to glance at on a phone.
+   a live update when new messages arrive, and a page on how to install Sundew and point an
+   application at it. Clean, small, no login (it is a dev tool behind a dev gateway), responsive
+   enough to glance at on a phone.
 4. **A query API for tests** — `GET /api/v1/messages` with filters (`to`, `from`, `body`
    contains, `account`, `since`, `provider`), paged; `GET /api/v1/messages/{id}`;
    `DELETE /api/v1/messages`, `DELETE /api/v1/messages/{id}`; `GET /api/v1/messages/latest?to=…`
@@ -34,7 +43,7 @@ One container, one binary, no external dependencies. It listens on one port and 
    application, with a configurable delay and outcome, so the application's inbound webhook
    handling is testable. Also an **inbound message simulator**: `POST /api/v1/inbound` makes
    Sundew call the application's inbound-SMS webhook in the chosen provider's shape ("the
-   merchant replied STOP").
+   recipient replied STOP").
 6. **Health and reset** — `GET /healthz`; `POST /api/v1/reset` empties the store (tests call it
    in setup).
 
@@ -64,13 +73,13 @@ default). No email (Mailpit does that).
 
 ## Shape
 
-- **Language and runtime:** a single static binary. Go is the recommendation (as `fouroclock`):
-  one image of a few megabytes, trivial cross-compilation, a standard library HTTP server, SQLite
-  through a pure-Go driver, embedded UI assets. The UI is plain HTML + a small amount of
-  JavaScript, embedded; no Node at runtime.
-- **Image:** `ghcr.io/<owner>/sundew:<version>`, `FROM scratch` or distroless, one port (default
-  `8025`-style single port for UI, façades and API, with a second optional port for the façades
-  only if a consumer needs them separated). Configuration by environment variables:
+- **Language and runtime:** a single static binary, written in Go: one image of a few megabytes,
+  trivial cross-compilation, a standard library HTTP server, SQLite through a pure-Go driver,
+  embedded UI assets. The UI is a small Svelte application, compiled at build time to static
+  assets and embedded; no Node at runtime.
+- **Image:** `ghcr.io/kobylinski/sundew:<version>`, `FROM scratch` or distroless, one port
+  (default `8025`-style single port for UI, façades and API, with a second optional port for the
+  façades only if a consumer needs them separated). Configuration by environment variables:
   `SUNDEW_STRICT_AUTH`, `SUNDEW_ACCOUNTS` (sid:token pairs), `SUNDEW_CALLBACK_DELAY`,
   `SUNDEW_CALLBACK_OUTCOME`, `SUNDEW_DB` (path; empty = memory), `SUNDEW_BASE_URL` (what the
   façades put in their own response links).
@@ -103,17 +112,22 @@ default). No email (Mailpit does that).
    cited reference and the known gaps, the OpenAPI file, a CI that builds the image and runs the
    acceptance above against it.
 
-## How Merchant Caddy will use it
+## How an application uses it
 
-Its SMS adapter interface gets a provider adapter (Twilio first) whose base URL is configurable;
-dev lanes point it at a `sundew` service in the dev compose, and the E2E journey that sends a
-form-request link by SMS reads the link back from `GET /api/v1/messages/latest`. Production points
-the same adapter at the real provider. Until Sundew exists, Merchant Caddy's SMS send is behind
-the adapter with no default sink; the "Outbox page" alternative was declined by Marek on 8 October
-in favour of this service.
+The application keeps its SMS sending behind a provider adapter (Twilio first) whose base URL is
+configurable. In development and CI the adapter points at a `sundew` service in the compose file,
+and an E2E journey that sends a link or a code by SMS reads it back from
+`GET /api/v1/messages/latest`. Production points the same adapter at the real provider; nothing
+else changes.
 
-## Open for Marek
+## Decided
 
-- ~~The GitHub owner and visibility~~ — decided 8 October: public repository `kobylinski/sundew`, MIT.
-- Whether the first release should also carry Vonage (Caddy Pay or another project may need it).
-- Whether a tiny Polish-market provider (SMSAPI, SerwerSMS) belongs in the provider list.
+- Public repository `kobylinski/sundew`, MIT.
+- The web UI is built with Svelte (`decision-web-ui-is-built-with-svelte.md`).
+- Go runs locally; the remote test host runs only containers
+  (`decision-go-runs-locally-remote-host-runs-only-containers.md`).
+
+## Open
+
+- Whether the first release should also carry Vonage.
+- Whether a small Polish-market provider (SMSAPI, SerwerSMS) belongs in the provider list.

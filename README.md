@@ -17,4 +17,4 @@ dew per text.
 
 ## Status
 
-Brief stage. See [docs/BRIEF.md](docs/BRIEF.md).
+Brief stage. See [docs/journal/2026-10-08/draft-sundew-brief.md](docs/journal/2026-10-08/draft-sundew-brief.md).

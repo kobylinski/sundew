@@ -15,7 +15,7 @@ A small, consolidated team: four contracts, one agent each.
 
 Names: [agent-name skill](.claude/skills/agent-name/SKILL.md). Tasks: `tasks:` (git-native,
 `rosemary.yml`). Decisions: `docs/journal/YYYY-MM-DD/decision-<slug>.md`. Product direction:
-[docs/BRIEF.md](docs/BRIEF.md).
+[docs/journal/2026-10-08/draft-sundew-brief.md](docs/journal/2026-10-08/draft-sundew-brief.md).
 
 ## The team
 

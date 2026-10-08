@@ -50,8 +50,8 @@ Integrator; what only the operator can answer becomes an operator question on th
 
 1. Claim; read the task's brief and Requirements; ask the Programmer on the gate if the brief's
    intent is unclear (an `explain` goes to the Integrator through the Programmer).
-2. Prototype under `prototypes/<slug>/` in the lane: static HTML/CSS/JS (Sundew's UI is served
-   embedded, no framework), one `README.md` stating what is binding vs illustrative, states,
+2. Prototype under `prototypes/<slug>/` in the lane: a Svelte application on mock data (Sundew's
+   UI is Svelte, compiled to static assets and served embedded), one `README.md` stating what is binding vs illustrative, states,
    responsive behaviour, keyboard and screen-reader behaviour, and the exact API calls the UI
    makes; a `VERIFICATION.md` with screenshots at 390, 768 and 1366 px.
 3. Operator acceptance through operator questions on the task (`operator(action="question")`),

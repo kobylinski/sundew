@@ -1,14 +1,14 @@
 # Sundew
 
 A catch-all SMS service for development and E2E tests — Mailpit, for text messages. Read
-[README.md](README.md) for the name and [docs/BRIEF.md](docs/BRIEF.md) for what is being built;
+[README.md](README.md) for the name and [docs/journal/2026-10-08/draft-sundew-brief.md](docs/journal/2026-10-08/draft-sundew-brief.md) for what is being built;
 the brief is the product direction until a spec replaces it.
 
 `CLAUDE.md` is a symlink to this file; keep shared guidance here.
 
 ## Documentation
 
-- `docs/BRIEF.md` — the brief (Marek, 8 October 2026).
+- `docs/journal/2026-10-08/draft-sundew-brief.md` — the brief (Marek, 8 October 2026).
 - `docs/journal/YYYY-MM-DD/<kind>-<slug>.md` — decisions, research, lessons; the `journal` skill's
   format (frontmatter: type, kind, title, status, author, created, tags). An accepted decision is a
   `decision` entry; provisional work is `draft`.
@@ -31,5 +31,6 @@ when the team is formed.
 
 ## Stack (when scaffolded)
 
-Go, standard library HTTP, SQLite through a pure-Go driver, embedded UI assets; a single static
-binary in a `FROM scratch` or distroless image. No Node at runtime.
+Go, standard library HTTP, SQLite through a pure-Go driver; the web UI is a Svelte application
+compiled to static assets and embedded; a single static binary in a `FROM scratch` or distroless
+image. Node only at build time, never at runtime.
