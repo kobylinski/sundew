@@ -22,8 +22,8 @@ One container, one binary, no external dependencies. It listens on one port and 
 1. **Provider façades** — HTTP endpoints that imitate the *sending* side of real SMS providers
    closely enough that an unmodified client SDK or a hand-written client works when its base URL
    is pointed at Sundew. Authentication is imitated too (Basic auth with account SID and token,
-   API-key headers, bearer tokens): by default any credential is accepted and recorded; a strict
-   mode accepts only configured credentials and answers the provider's own 401 shape.
+   API-key headers, bearer tokens): any credential is accepted and recorded as sent. Provider
+   errors are triggered by the provider's documented magic phone numbers, not by credentials.
 2. **A catch store** — every accepted message is stored with: provider, account/credential used,
    from, to, body, segments, media URLs, provider-shaped message id, status, timestamps, the raw
    request, and any provider options (status callback URL, validity, sender id).
@@ -67,22 +67,21 @@ behaviour is unknowable without an account, say so in the module rather than gue
 ## Non-goals
 
 No real sending, ever — there is no provider credential anywhere in Sundew. No MMS media
-hosting beyond storing the URLs given. No multi-user accounts or login in the UI. No persistence
-guarantees beyond the container's lifetime unless a volume is mounted (SQLite file; in-memory by
-default). No email (Mailpit does that).
+hosting beyond storing the URLs given. No multi-user accounts or login in the UI. No persistence:
+messages live in memory and are gone when the container stops. No email (Mailpit does that).
 
 ## Shape
 
 - **Language and runtime:** a single static binary, written in Go: one image of a few megabytes,
-  trivial cross-compilation, a standard library HTTP server, SQLite through a pure-Go driver,
-  embedded UI assets. The UI is a small Svelte application, compiled at build time to static
+  trivial cross-compilation, a standard library HTTP server, an in-memory store, embedded UI
+  assets. The UI is a small Svelte application, compiled at build time to static
   assets and embedded; no Node at runtime.
 - **Image:** `ghcr.io/kobylinski/sundew:<version>`, `FROM scratch` or distroless, one port
   (default `8025`-style single port for UI, façades and API, with a second optional port for the
   façades only if a consumer needs them separated). Configuration by environment variables:
-  `SUNDEW_STRICT_AUTH`, `SUNDEW_ACCOUNTS` (sid:token pairs), `SUNDEW_CALLBACK_DELAY`,
-  `SUNDEW_CALLBACK_OUTCOME`, `SUNDEW_DB` (path; empty = memory), `SUNDEW_BASE_URL` (what the
-  façades put in their own response links).
+  `SUNDEW_ADDR`, `SUNDEW_CALLBACK_DELAY`, `SUNDEW_CALLBACK_OUTCOME`, `SUNDEW_INBOUND_URL` (the
+  application's inbound-SMS webhook), `SUNDEW_BASE_URL` (what the façades put in their own
+  response links).
 - **Compose snippet** in the README for the common case (an app whose `TWILIO_API_BASE` points
   at `http://sundew:8025`), and a gateway label example for stacks behind a dev gateway.
 - **E2E helpers:** the HTTP API is the contract; thin optional helpers for Playwright and Vitest
@@ -105,8 +104,8 @@ default). No email (Mailpit does that).
    with an error code.
 6. `POST /api/v1/inbound` makes Sundew POST a Twilio-shaped inbound message to the configured
    application webhook.
-7. Strict auth refuses an unknown SID/token with Twilio's 401 body; default mode accepts and
-   records anything.
+7. Any SID/token is accepted and recorded; a message to or from one of Twilio's documented
+   magic numbers gets that number's error in Twilio's shape.
 8. `POST /api/v1/reset` empties the store; a test suite's setup can rely on it.
 9. The repository has: README with the compose snippet, `docs/providers/twilio.md` with the
    cited reference and the known gaps, the OpenAPI file, a CI that builds the image and runs the
@@ -126,6 +125,9 @@ else changes.
 - The web UI is built with Svelte (`decision-web-ui-is-built-with-svelte.md`).
 - Go runs locally; the remote test host runs only containers
   (`decision-go-runs-locally-remote-host-runs-only-containers.md`).
+- No persistence, in memory only (`decision-messages-are-kept-in-memory-only.md`).
+- Any credential is accepted; errors come from magic numbers
+  (`decision-any-credential-accepted-errors-by-magic-numbers.md`).
 
 ## Open
 

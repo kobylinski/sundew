@@ -31,6 +31,6 @@ when the team is formed.
 
 ## Stack (when scaffolded)
 
-Go, standard library HTTP, SQLite through a pure-Go driver; the web UI is a Svelte application
+Go, standard library HTTP, an in-memory store; the web UI is a Svelte application
 compiled to static assets and embedded; a single static binary in a `FROM scratch` or distroless
 image. Node only at build time, never at runtime.

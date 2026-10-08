@@ -11,7 +11,7 @@ says where each part lives and what it may depend on.
 | `internal/core` | The seam: `Message`, `Filter`, `Store`, `Bus`, `Provider`, `Config`, `Deps`. Types and interfaces only. | nothing in this module |
 | `internal/config` | Reads `SUNDEW_*` into `core.Config`. | `core` |
 | `internal/bus` | The in-process `core.Bus`. | `core` |
-| `internal/store` | The SQLite `core.Store` (file, or in-memory when `SUNDEW_DB` is empty). Publishes an event for every write. | `core` |
+| `internal/store` | The in-memory `core.Store`; nothing is written to disk. Publishes an event for every write. | `core` |
 | `internal/server` | Builds the `http.Handler`: one `ServeMux`, `/healthz`, and the list of registrations. | `core` |
 | `internal/provider/<name>` | One imitated provider: façade routes, auth, response shapes, status and inbound webhook payloads. | `core` |
 | `internal/api` | The query API under `/api/v1` (messages, latest, stream, reset, inbound, `openapi.json`). | `core` |
@@ -30,8 +30,8 @@ too. Changing the file is a `decide` gate, not a line in a feature branch.
 
 ## How a message flows
 
-1. The application calls a façade route. The provider module checks the credential (any is
-   accepted unless `StrictAuth`), builds a `core.Message` with `Direction: Outbound`,
+1. The application calls a façade route. The provider module accepts any credential, answers
+   the provider's own error when a magic number asks for one, and otherwise builds a `core.Message` with `Direction: Outbound`,
    `Status: queued` and the raw `Exchange`, calls `Store.Insert`, writes the provider-shaped
    response.
 2. The store assigns `ID`, sets the timestamps, saves, publishes `message.created`.

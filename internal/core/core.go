@@ -87,8 +87,14 @@ type Filter struct {
 // ErrNotFound is returned by Store when no message matches.
 var ErrNotFound = errors.New("message not found")
 
-// Store keeps caught messages, newest first. Every successful write publishes
-// the matching Event on the Bus the store was built with.
+// ErrInvalidFilter is returned (wrapped) by Store.List and Store.Latest for a
+// malformed cursor or a limit outside the store's range.
+var ErrInvalidFilter = errors.New("invalid message filter")
+
+// Store keeps caught messages in memory, newest first, for the life of the
+// process; nothing is written to disk. Insert assigns ID when it is empty and
+// sets CreatedAt and UpdatedAt when they are zero. Every successful write
+// publishes the matching Event on the Bus the store was built with.
 type Store interface {
 	Insert(ctx context.Context, m *Message) error
 	Get(ctx context.Context, id string) (*Message, error)
@@ -144,8 +150,8 @@ type Provider interface {
 	Name() string
 	// Register mounts the façade's routes. A handler parses the provider's
 	// request into a Message, inserts it into d.Store and writes the
-	// provider-shaped response; it also answers the provider's own 401 when
-	// d.Config.StrictAuth refuses the credential.
+	// provider-shaped response. Any credential is accepted and stored as sent;
+	// provider errors are triggered by the provider's documented magic numbers.
 	Register(mux *http.ServeMux, d Deps)
 	// StatusRequest builds the provider-shaped status webhook for m moving to
 	// s. It returns nil, nil when m asked for no status callback.
@@ -157,14 +163,11 @@ type Provider interface {
 // Config is Sundew's configuration, read from the environment by
 // internal/config.
 type Config struct {
-	Addr            string            // SUNDEW_ADDR, default ":8025"
-	StrictAuth      bool              // SUNDEW_STRICT_AUTH
-	Accounts        map[string]string // SUNDEW_ACCOUNTS, "sid:token,sid:token"
-	CallbackDelay   time.Duration     // SUNDEW_CALLBACK_DELAY, between two status webhooks
-	CallbackOutcome string            // SUNDEW_CALLBACK_OUTCOME, "delivered" (default) or "failed"
-	DB              string            // SUNDEW_DB, SQLite path; empty means in-memory
-	BaseURL         string            // SUNDEW_BASE_URL, used in links the façades return
-	InboundURL      string            // SUNDEW_INBOUND_URL, default target of POST /api/v1/inbound
+	Addr            string        // SUNDEW_ADDR, default ":8025"
+	CallbackDelay   time.Duration // SUNDEW_CALLBACK_DELAY, between two status webhooks
+	CallbackOutcome string        // SUNDEW_CALLBACK_OUTCOME, "delivered" (default) or "failed"
+	BaseURL         string        // SUNDEW_BASE_URL, used in links the façades return
+	InboundURL      string        // SUNDEW_INBOUND_URL, default target of POST /api/v1/inbound
 }
 
 // Deps is what a package needs to register its routes or run.
