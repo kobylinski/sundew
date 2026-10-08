@@ -17,17 +17,16 @@ dew per text.
 
 ## Status
 
-Foundation stage: configuration, in-memory message storage, event subscriptions and `/healthz`.
-Provider façades, the query API and UI are being built. See the
+Twilio send/fetch, the query API, callback simulation and the live web inbox are implemented.
+Messages are kept in memory for the life of the process. See the
 [brief](docs/journal/2026-10-08/draft-sundew-brief.md).
 
 ## Run it
 
-Run a published version (replace `<namespace>` and `<version>` with the Docker Hub
-repository and release version configured by your operator):
+Run a published version from Docker Hub (replace `<version>` with a release version):
 
 ```sh
-docker run --rm -p 8025:8025 <namespace>/sundew:<version>
+docker run --rm -p 8025:8025 kobylinski/sundew:<version>
 curl http://localhost:8025/healthz
 ```
 
@@ -36,7 +35,7 @@ For an application using Compose:
 ```yaml
 services:
   sundew:
-    image: <namespace>/sundew:<version>
+    image: kobylinski/sundew:<version>
     ports:
       - "8025:8025"
   app:
@@ -129,3 +128,29 @@ For outbound messages carrying a provider status-callback URL, Sundew sends
 `queued`, `sent`, then `delivered`, waiting `SUNDEW_CALLBACK_DELAY` between sends.
 Set `SUNDEW_CALLBACK_OUTCOME=failed` for a final failed webhook with the provider's
 default error code. A failed receiver is logged and the sequence continues.
+
+## Web UI
+
+Open `http://localhost:8025/` for the live inbox, substring search and exact To/From phone
+filters. Select a message for its continuous report and original HTTP exchange; Raw jumps
+to the captured request. Delete confirmations distinguish one message from the entire store.
+Install help is one navigation link away. The layout adapts to phones and follows the system
+light/dark preference. Links open a new tab; captured raw exchanges remain literal.
+
+![Sundew inbox and message report](web/docs/inbox-1366.png)
+
+The image builds and embeds the Svelte application. For a local Go binary with the UI:
+
+```sh
+cd web
+npm ci
+npm test
+npm run build
+cd ..
+go run ./cmd/sundew
+```
+
+A fresh clone can build and test Go without Node; it serves a small “UI is not built” page.
+Generated assets are ignored and replaced by each web build; only the Go fallback page is
+committed. `npm run dev` in `web/` starts Vite at `http://127.0.0.1:4281` and proxies the API
+to a local Sundew process at port 8025. No Node server runs in the released image.

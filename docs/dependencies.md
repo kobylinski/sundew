@@ -84,3 +84,27 @@ All versions are pinned by `prototypes/web-ui/package-lock.json`. Nothing instal
 Maintenance is checked against repository activity, not npm publish dates. This table records every package in the lockfile, including optional native packages and both locked versions of `magic-string`.
 
 No implementation dependency is approved solely by being present in this prototype. The eventual application task must apply the dependency policy agreed by the operator.
+
+## Production Svelte UI
+
+Checked on **2026-10-08** for `web/`. The production lockfile is identical to the prototype's
+lockfile apart from the root package name (verified by parsed JSON comparison). The complete
+version/platform package table above therefore also enumerates the production set, with the
+same cited maintenance evidence. Direct dependencies remain `svelte@5.57.2`,
+`@sveltejs/vite-plugin-svelte@7.3.1`, and `vite@8.3.3`; their cited upstream commits were
+rechecked on this date. No test dependency is added: tests use Node's built-in runner; the palette comparison uses
+the already-pinned PostCSS parser from Vite.
+`npm ci` reports zero known vulnerabilities. Only compiled JS/CSS ships in the Go binary;
+Node and build modules are absent from the scratch runtime. Build infrastructure adds the
+official `node:24-alpine` stage and `actions/setup-node@v4`, pinned to
+[`49933ea`](https://github.com/actions/setup-node/commit/49933ea5288caeca8642d1e84afbd3f7d6820020).
+The setup-node repository's latest commit was checked through the official GitHub API:
+[`949feb2`](https://github.com/actions/setup-node/commit/949feb2413d6458794dcd2491c4babbbce0c15c1),
+2026-10-08, within six months.
+
+The twelve older transitive packages remain explicitly listed above with their last upstream
+commit. Marek approved this pinned set for production on **2026-10-08 at 15:38 UTC**, answering
+`tasks:4f6ecdb55a9238e9#q1` with `extend_to_production`. The six-month rule applies to packages
+we choose directly; these older transitive packages are documented exceptions. The earlier
+prototype-only approval remains recorded separately above. See the
+[accepted dependency policy](journal/2026-10-08/decision-dependency-rule-applies-to-directly-chosen-packages.md).

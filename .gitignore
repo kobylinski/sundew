@@ -2,3 +2,8 @@
 *.db
 /sundew
 /dist/
+
+/web/node_modules/
+/internal/ui/static/*
+!/internal/ui/static/placeholder.html
+/internal/ui/dist/
