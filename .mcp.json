@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "rosemary": {
+      "type": "stdio",
+      "command": "/bin/sh",
+      "args": [
+        "-c",
+        "exec \"$HOME/.local/bin/rosie\" mcp"
+      ],
+      "env": {
+        "ROSIE_CLAUDE_STOP_HOOK": "1"
+      }
+    }
+  }
+}

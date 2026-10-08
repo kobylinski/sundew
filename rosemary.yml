@@ -1,0 +1,139 @@
+# rosemary.yml — Rosemary project settings (committed; per-machine wiring such
+# as .mcp.json is not).
+
+name: sundew
+label: Sundew
+
+# ── doc corpus ────────────────────────────────────────────────────────────
+# Map of glob → props. Bare {} means "index, no per-pattern extraction".
+docs:
+  '*.md': {}
+  'docs/**/*.md': {}
+
+  # Journal — entries follow the `journal` skill: docs/journal/YYYY-MM-DD/<kind>-<slug>.md.
+  # Frontmatter-first, with path + history fallbacks via Coalesce.
+  'docs/journal/**/*.md':
+    attributes:
+      author:  content::frontmatter.author | Trim
+      kind:    (content::frontmatter.kind, file::path | Extract:#/([a-z]+)-[^/]*\.md$#) | Coalesce | Lower | As:Enum(decision,research,tombstone,lesson,source,summary,reminder,draft,plan)
+      status:  content::frontmatter.status | Lower | As:Enum(confirmed,provisional,archived)
+      created: (content::frontmatter.created | ParseDate?, file::path | Extract:#/(\d{4}-\d{2}-\d{2})/# | ParseDate?, history::first.authored | ParseDate?) | Coalesce | As:Date
+      updated: (content::frontmatter.updated | ParseDate?, history::last.committed | ParseDate?) | Coalesce | As:Date
+      tags:    content::frontmatter.tags | Map:{$ | Trim | Lower} | Compact | Dedup:casefold | As:List(String)
+
+# ── code corpus ───────────────────────────────────────────────────────────
+# No `code` block yet: there is no source tree (Go, under cmd/ and internal/, when scaffolded). Add `code.paths` when the
+# application is scaffolded (and restart the daemon — settings are read at boot).
+
+# ── graph edges ───────────────────────────────────────────────────────────
+# The journal's reference keys become edges. Their values are paths relative
+# to the journal root, so each is prefixed to a repo-relative doc address.
+# Rules are block-style: queries carry { } and commas, which are flow-map
+# indicators — block context keeps them literal, so no quotes.
+edges:
+  supersedes:
+    priority: 10
+    rules:
+      - from: doc
+        to: doc
+        query: content::frontmatter.supersedes | Map:{$ | Replace:#^#:'docs/journal/'} | As:List(String)
+
+  sourced_from:
+    rules:
+      - from: doc
+        to: doc
+        query: content::frontmatter.sourced-from | Map:{$ | Replace:#^#:'docs/journal/'} | As:List(String)
+
+  follows_up:
+    rules:
+      - from: doc
+        to: doc
+        query: content::frontmatter.follows-up | Map:{$ | Replace:#^#:'docs/journal/'} | As:List(String)
+
+  consequence_of:
+    rules:
+      - from: doc
+        to: doc
+        query: content::frontmatter.consequence-of | Map:{$ | Replace:#^#:'docs/journal/'} | As:List(String)
+
+  resolves:
+    rules:
+      - from: doc
+        to: doc
+        query: content::frontmatter.resolves | Map:{$ | Replace:#^#:'docs/journal/'} | As:List(String)
+
+  # A task named as tasks:<id> in a commit or a document links to that task.
+  mentions:
+    rules:
+      - from: commit
+        to: ticket
+        instance: tasks
+        query:
+          - commit::subject | CaptureAll:#tasks:([0-9a-f]{16})# | As:List(String)
+          - commit::body | CaptureAll:#tasks:([0-9a-f]{16})# | As:List(String)
+      - from: doc
+        to: ticket
+        instance: tasks
+        query: content::body | CaptureAll:#tasks:([0-9a-f]{16})# | As:List(String)
+
+# ── git workflow ──────────────────────────────────────────────────────────
+# The shared ref a task must be merged into before it can be marked done.
+git:
+  integration_ref: main
+
+# ── embedding ─────────────────────────────────────────────────────────────
+# Remote: Mistral's embedding model, so that no embedder is loaded on the
+# laptop. The key is in Rosemary's secret store (`rosie secret set
+# provider:mistral`), never in this file. What goes out is what is indexed:
+# the markdown named under `docs` above, and the text of a search.
+# Without the service search falls back to its lexical arm.
+embedding:
+  model: mistral/embed
+  dimensions: 1024
+
+# ── tickets ───────────────────────────────────────────────────────────────
+# Bare refs route to `tasks`; GitHub issues are addressed as `gh:<number>`.
+tickets:
+  default: tasks
+
+  # Working tasks, git-native: commits under refs/rosemary/tickets/*, the same
+  # from every branch and worktree, nothing in the working tree.
+  tasks:
+    type: git
+    label: Local tasks
+    # A write commits locally, then the daemon pushes the ticket ref to origin.
+    # No polling. Set `off` to keep tasks on this machine only.
+    sync: on_demand
+    # The status each lifecycle verb writes. Without this map `ticket start`,
+    # `done` and `close` are refused: only `open` has a built-in default.
+    statuses:
+      defaults:
+        open: open
+        in_progress: in_progress
+        done: done
+        closed: closed
+      scope:
+        - { name: open,        state: open }
+        - { name: in_progress, state: in_progress }
+        - { name: done,        state: done }
+        - { name: closed,      state: closed }
+    # What agents may do here. The list is complete: `set_actionable` is on it so
+    # the Architect can release a task on the operator's go (docs/contracts/architect.md).
+    # Which contract may use which action is the contracts' business, not this list's.
+    agent_actions:
+      - create
+      - edit_content
+      - edit_attributes
+      - assign
+      - change_status
+      - add_comment
+      - add_question
+      - add_gate
+      - set_actionable
+
+  # GitHub issues on the private repository.
+  # token: credential store, `rosie secret set tickets:gh` — never in this file.
+  gh:
+    type: github
+    label: GitHub issues
+    default_repo: kobylinski/sundew

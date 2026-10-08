@@ -1,0 +1,4 @@
+.worktrees/
+*.db
+/sundew
+/dist/
