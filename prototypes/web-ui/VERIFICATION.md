@@ -16,13 +16,13 @@ npm run build --prefix prototypes/web-ui
 git diff --check
 ```
 
-All exited **0**. The refined design builds with Vite 8.3.3 (119 modules), without compiler warnings. The static build was also opened through `npm run preview` on port 4280: eight fixture rows rendered and the development-only prototype controls were absent. The browser error log returned no entries.
+All exited **0**. The refined design builds with Vite 8.3.3 (119 modules), without compiler warnings. The static build was also opened through `npm run preview` on port 4280: eight fixture rows rendered and the development-only prototype controls were absent. Fresh preview loads produced no errors. The running development server briefly reported hot-reload failures while the rebase replaced component files; a full reload after the rebase rendered all eight rows with no new errors.
 
 The development preview is <http://127.0.0.1:4279/>. Port 4179 was already occupied, so the prototype uses its own port. No existing service was stopped.
 
 ## Interaction checks
 
-The [initial browser observations](interaction-checks.json) contain 30 checks of the comparison at `f0ff096`. The [refinement observations](refinement-checks.json) add 13 focused checks after layout consolidation and visual changes: raw copy, tab navigation, system/default themes, responsive edge states, search, deletion focus, staged arrivals and hidden-by-default review controls. All 13 passed. The checks exercise the rendered UI through its controls; they are not a committed automated test suite.
+The [initial browser observations](interaction-checks.json) contain 30 checks of the comparison at `a42a337` (originally `f0ff096`). The [refinement observations](refinement-checks.json) add 13 focused checks after layout consolidation and visual changes: raw copy, tab navigation, system/default themes, responsive edge states, search, deletion focus, staged arrivals and hidden-by-default review controls. All 13 passed. The checks exercise the rendered UI through its controls; they are not a committed automated test suite.
 
 | Area | Observed result |
 | --- | --- |
@@ -66,6 +66,8 @@ Additional evidence:
 
 No real provider, API, SSE connection or Docker command was exercised by this prototype. Retry, paging, arrival and deletion are local UI demonstrations. The README maps the implementation to the real API, including `q`, cursors, named SSE events, reconnection, null collections and 204 delete responses.
 
-Semantic markup, focus and keyboard behavior were inspected in Chrome. No real screen reader, touch device, cross-browser run or formal accessibility certification was performed. Automatic theme selection matched the OS preference; light/dark overrides and returning to System were exercised. The OS setting itself was not changed during this session, so the live OS-change listener was code-reviewed rather than exercised. Browser-extension warnings appeared in the shared Chrome environment; no application error was observed.
+Semantic markup, focus and keyboard behavior were inspected in Chrome. No real screen reader, touch device, cross-browser run or formal accessibility certification was performed. Automatic theme selection matched the OS preference; light/dark overrides and returning to System were exercised. The OS setting itself was not changed during this session, so the live OS-change listener was code-reviewed rather than exercised. Browser-extension warnings appeared in the shared Chrome environment. The rebase-related hot-reload errors described above did not recur on a fresh page load.
 
 All prototype code remains disposable and outside `web/` and `internal/`. q2–q5 are answered: layout A, inspector content/interactions, dedicated Install page, and both themes with automatic switching. Review of the visual refinement requested in q2 is the remaining task requirement. No Rosemary gate has been raised or claimed, following the operator's instruction.
+
+The lane was rebased on `origin/main` at `70856c1`. The dependency-document overlap was resolved by retaining main's Go/Twilio records and appending the scoped Svelte audit. The refined build passed after the rebase.

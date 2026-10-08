@@ -14,7 +14,7 @@ npm run dev
 
 Local URL: <http://127.0.0.1:4279/>. Node is used only to build and serve this prototype. `npm run build` produces static assets in `dist/`; `npm run preview` serves that build on port 4280.
 
-The selected split inbox is the only layout. [Open the prototype](http://127.0.0.1:4279/) to use the system theme; [force light](http://127.0.0.1:4279/?theme=light) or [force dark](http://127.0.0.1:4279/?theme=dark) for visual review. B/C and the layout switcher have been removed. The original three-way comparison is preserved in commit `f0ff096`.
+The selected split inbox is the only layout. [Open the prototype](http://127.0.0.1:4279/) to use the system theme; [force light](http://127.0.0.1:4279/?theme=light) or [force dark](http://127.0.0.1:4279/?theme=dark) for visual review. B/C and the layout switcher have been removed. The original three-way comparison is preserved in commit `a42a337` (original review commit `f0ff096`).
 
 The UI defaults to `prefers-color-scheme` and listens for changes while open. Both palettes are product requirements. A manual theme setting is not proposed: the `theme` override is only a prototype review aid.
 
