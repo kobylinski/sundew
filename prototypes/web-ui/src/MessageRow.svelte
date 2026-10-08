@@ -2,7 +2,7 @@
   import Icon from './Icon.svelte';
   import Highlight from './Highlight.svelte';
   import { time, dateTime } from './data.js';
-  let { message, selected = false, query = '', onopen, ondelete } = $props();
+  let { message, selected = false, query = '', onopen } = $props();
 </script>
 
 <article class="message-row" class:selected data-message={message.id}>
@@ -19,6 +19,5 @@
   </button>
   <div class="row-actions">
     <button type="button" class="raw-button" onclick={() => onopen(message.id, 'request')} aria-label={'View raw request for message to ' + message.to}><Icon name="code" size={14} /><span>Raw</span></button>
-    <button type="button" class="icon-button delete-row" onclick={() => ondelete(message)} aria-label={'Delete message to ' + message.to} title="Delete message"><Icon name="trash" size={15} /></button>
   </div>
 </article>

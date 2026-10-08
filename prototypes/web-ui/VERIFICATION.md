@@ -2,72 +2,68 @@
 
 Task: `tasks:40a0d78a850976e8` · Daniel · 8 October 2026.
 
-The selected split-inbox prototype builds and runs. The operator chose A, accepted the inspector and Install page content, and requested automatic light/dark themes in q2–q5. The requested visual refinement is implemented; its final appearance remains to be reviewed. B/C are removed. This is design evidence on fictional fixtures, not backend or end-to-end acceptance.
+The q6 revision is implemented: one continuous message report with normal document scrolling, no inspector card or tabs, 14 px body text, one per-message delete location, search aligned with the list, exact phone autocomplete after `+`, and no sort label or inbox footer. The accepted Install content and automatic light/dark themes remain. This candidate awaits operator review; q6 requested changes and is not acceptance of this revision.
 
-Marek approved the prototype-only dependency exception in `tasks:40a0d78a850976e8#q1` at 04:27 UTC. The complete lockfile audit is in [docs/dependencies.md](../../docs/dependencies.md); production dependencies are outside that approval.
+This is design evidence on fictional fixtures, not backend or end-to-end acceptance. All code remains under `prototypes/web-ui/`, outside `web/` and `internal/`. No new dependencies were added. Marek’s prototype-only exception in q1 still scopes the [existing dependency audit](../../docs/dependencies.md).
 
 ## Build
 
-Environment: macOS, Node `v24.13.1`, npm `11.8.0`. From the task worktree on 8 October 2026:
+Environment: macOS, Node `v24.13.1`, npm `11.8.0`. Commands run from the task worktree:
 
 ```sh
-npm ci --no-audit --no-fund --prefix prototypes/web-ui
 npm run build --prefix prototypes/web-ui
 git diff --check
 ```
 
-All exited **0**. The refined design builds with Vite 8.3.3 (119 modules), without compiler warnings. The static build was also opened through `npm run preview` on port 4280: eight fixture rows rendered and the development-only prototype controls were absent. Fresh preview loads produced no errors. The running development server briefly reported hot-reload failures while the rebase replaced component files; a full reload after the rebase rendered all eight rows with no new errors.
+Both exited **0**. Vite 8.3.3 compiled 119 modules without warnings: CSS 24.83 kB, JavaScript 74.52 kB (27.98 kB gzip). The rebuilt static preview on port 4280 rendered eight messages and the continuous report, omitted development controls, and produced no browser error logs on the fresh load.
 
-The development preview is <http://127.0.0.1:4279/>. Port 4179 was already occupied, so the prototype uses its own port. No existing service was stopped.
+Development preview: <http://127.0.0.1:4279/>. Static preview: <http://127.0.0.1:4280/>. No existing service was stopped. This revision retains the previous dependency lockfile and base `70856c1`.
 
-## Interaction checks
+## Current interaction evidence
 
-The [initial browser observations](interaction-checks.json) contain 30 checks of the comparison at `a42a337` (originally `f0ff096`). The [refinement observations](refinement-checks.json) add 13 focused checks after layout consolidation and visual changes: raw copy, tab navigation, system/default themes, responsive edge states, search, deletion focus, staged arrivals and hidden-by-default review controls. All 13 passed. The checks exercise the rendered UI through its controls; they are not a committed automated test suite.
+[report-revision-checks.json](report-revision-checks.json) records **33 focused browser observations, all passed**, using visible controls and read-only DOM inspection. These are observed checks, not an automated test suite.
 
 | Area | Observed result |
 | --- | --- |
-| Search | Recipient/sender query `15559876543` returned two rows; uppercase `SIGN-IN` matched one body; the second account SID matched one row; a missing phrase showed a distinct no-results state. |
-| Raw exchange | Row Raw opened the captured request; request and response clipboard contents exactly matched their displayed strings. The captured queued response stayed separate from the current delivered status. |
-| Copy feedback | Changing Docker to Compose reset the previous Copied state; each format copied its own complete source string. |
-| Detail navigation | Opening detail focused its heading; closing returned to the corresponding message row. B opened standalone detail; C expanded its request inline. |
-| Keyboard | `/` focused search; Escape cleared a search while retaining focus. Arrow-key tab navigation selected and focused Response. Layout-switcher arrows did not intercept an editable search. |
-| Delete | The native confirmation initially focused Cancel. Escape cancelled without removing rows. Delete-one removed the targeted filtered row. Delete-all cleared filtered-out rows too. Completion focused the inbox heading. |
-| Paging | The many-message fixture initially rendered 50 rows; Load 50 more rendered 100 while retaining the first page. The badge indicated more available instead of claiming a server total. |
-| Arrival | An arrival at the top added a row and preserved the selected inspector. While scrolled down, it stayed behind Show newest; choosing that control returned to the top with focus on the inbox heading. |
-| Recovery | The disconnected state disabled search/destructive actions and exposed Try again and installation help. Retry restored the mock inbox and focused its heading. |
-| Loading | Skeletons were absent from the accessibility snapshot; the loading region contained one loading status. Search and Delete all were disabled. |
-| Message edge cases | Long text and an extended reference wrapped on the phone. Inbound records with no HTTP exchange showed an explicit empty state. Failed messages showed a text status and error code 30003. |
-| Responsive | List, detail and installation layouts were inspected at the three required widths. Phone inbox, raw request, long body and install content had no horizontal page overflow. |
+| Layout | Desktop search and list both measured 528.2734375 px. Their phone widths also matched. Report body text measured 14 px. No tabs, inner report scrolling, detail border, row delete controls, sort label or inbox footer remained. |
+| Report | Message content, metadata, request and response were present together. Row Raw focused the request heading and scrolled the document to it; on phone its top was 24 px below the viewport edge. Back returned focus to the originating row. |
+| Phone suggestions | Typing `+155598` exposed To and From suggestions. ArrowUp selected the last suggestion, ArrowDown the first; Enter applied it. Pointer selection also worked. Escape dismissed suggestions while preserving the query. |
+| Exact filters | From `+15559876543` selected the inbound STOP message; To `+15551234567` selected two messages. Adding uppercase `PARCEL` narrowed the latter to one. Clear filters restored all eight. Reload retained the phone filter and selected a matching report. |
+| Raw copying | Request and response clipboard text exactly matched the strings displayed in the report. |
+| Delete | Exactly one per-message Delete action appeared in Message tools. Its dialog initially focused Cancel. Cancel retained eight rows. Confirming delete under a phone filter retained that filter and the next matching message; completion focused the inbox heading. Delete all also removed hidden messages. |
+| Responsive | Report and raw strings had no horizontal overflow at 390 px, including the long-body fixture. Tablet and phone used document scrolling with no nested inspector scroll. Screenshots cover 390, 768 and 1366 px. |
+| Edge messages | Inbound displayed both missing-exchange explanations in the same report. Failed delivery retained its text status and error code 30003. |
+| Recovery | Retry restored eight rows and returned focus to the inbox heading. Empty, loading and disconnected states were recaptured. |
+| Paging | The many-message fixture started at 50 rows; Load 50 more exposed 100. The list used document scrolling. |
+| Arrivals | An arrival outside an exact phone filter preserved its selected report. A scrolled arrival waited behind Show newest without inserting rows. Show newest returned to the top and focused the inbox heading; the current 100-row page size was retained. |
+| Static build and themes | The rebuilt static preview rendered the report without development controls. Default theme matched the OS. Both explicit palettes were visually inspected. |
 
-Independent fixture validation also passed: a Node assertion pass over 280 fixtures across eight states verified the exact `core.Message` JSON keys, newest-first ordering, timestamps, status/direction values and header arrays. `node --check` passed for `src/data.js` and `src/main.js`.
+The [initial 30 observations](interaction-checks.json) at `a42a337` and [13 earlier refinement observations](refinement-checks.json) at `f705a4e` are historical evidence. Their references to B/C layouts and detail tabs do not describe this candidate. The initial fixture validation covered 280 fixtures and exact `core.Message` fields; the unchanged fixture source was not revalidated in this visual revision.
 
-Issues found and corrected during verification: an empty CSS import prevented the first build; initial-value/accessibility compiler warnings; copy feedback carried into a changed snippet; missing spacing before installation defaults; focus fell to the document after Show newest and Retry. The successful build and final interaction checks above include the corrections.
+## Screenshots
 
-## Responsive screenshots
-
-These are actual browser captures of the refined design, not generated mockups. Review controls are hidden by default; the arrival example explicitly enables them to show how it was exercised. Full-page detail/install images are taller than the viewport listed in the column.
+These are actual browser captures of the q6 revision. Full reports are deliberately taller than the viewport because the document scrolls. The controls in the arrival example are development-only.
 
 | Screen | 390 px | 768 px | 1366 px |
 | --- | --- | --- | --- |
-| A: split inbox | [Phone](screenshots/a-inbox-390.png) | [Tablet](screenshots/a-inbox-768.png) | [Desktop](screenshots/a-inbox-1366.png) |
-| A: message detail | [Phone](screenshots/a-detail-390.png) | [Tablet](screenshots/a-detail-768.png) | [Desktop inspector](screenshots/a-inbox-1366.png) |
+| Inbox | [Phone](screenshots/a-inbox-390.png) | [Tablet](screenshots/a-inbox-768.png) | [Desktop](screenshots/a-inbox-1366.png) |
+| Complete report | [Phone](screenshots/a-detail-390.png) | [Tablet](screenshots/a-detail-768.png) | [Desktop](screenshots/a-report-1366.png) |
 | Installation | [Phone](screenshots/install-390.png) | [Tablet](screenshots/install-768.png) | [Desktop](screenshots/install-1366.png) |
+| Phone autocomplete | [Phone](screenshots/phone-autocomplete-390.png) | — | [Desktop](screenshots/phone-autocomplete-1366.png) |
 
-Additional evidence:
+Additional captures:
 
-- Raw request: [phone](screenshots/a-request-390.png), [desktop](screenshots/a-request-1366.png); [captured response](screenshots/a-response-1366.png).
-- [Delete-all confirmation while filtered](screenshots/delete-all-1366.png).
-- [Empty](screenshots/empty-390.png), [loading](screenshots/loading-390.png), [disconnected](screenshots/offline-390.png), [long body](screenshots/long-390.png).
+- Raw request jump: [phone](screenshots/a-request-390.png), [desktop](screenshots/a-request-1366.png); [response section](screenshots/a-response-1366.png).
+- [Delete-all confirmation under a phone filter](screenshots/delete-all-1366.png).
+- [Empty](screenshots/empty-390.png), [loading](screenshots/loading-390.png), [disconnected](screenshots/offline-390.png), [long report](screenshots/long-390.png).
 - [Inbound without an exchange](screenshots/inbound-1366.png), [failed delivery](screenshots/failed-1366.png), [staged arrival](screenshots/arrival-pending-1366.png).
-- Dark theme: [phone](screenshots/a-dark-390.png), [desktop](screenshots/a-dark-1366.png).
+- Dark theme: [phone report](screenshots/a-dark-390.png), [desktop](screenshots/a-dark-1366.png).
 - [Compose and expanded curl example on phone](screenshots/install-compose-390.png).
 
 ## Limits and handoff
 
-No real provider, API, SSE connection or Docker command was exercised by this prototype. Retry, paging, arrival and deletion are local UI demonstrations. The README maps the implementation to the real API, including `q`, cursors, named SSE events, reconnection, null collections and 204 delete responses.
+No real provider, API, SSE connection or Docker command was exercised. Retry, paging, arrival and deletion are local UI demonstrations. The README maps the implementation to actual `q`, `to`, `from`, cursor and SSE contracts, null collections and 204 delete responses. Exact phone matching combined with `q` was checked against `internal/api/api.go` in this lane. Suggestions derive from loaded matching results; the API provides no complete phone-directory endpoint.
 
-Semantic markup, focus and keyboard behavior were inspected in Chrome. No real screen reader, touch device, cross-browser run or formal accessibility certification was performed. Automatic theme selection matched the OS preference; light/dark overrides and returning to System were exercised. The OS setting itself was not changed during this session, so the live OS-change listener was code-reviewed rather than exercised. Browser-extension warnings appeared in the shared Chrome environment. The rebase-related hot-reload errors described above did not recur on a fresh page load.
+Semantic markup, focus and keyboard behavior were inspected in Chrome. No real screen reader, touch device, cross-browser run or formal accessibility certification was performed. The OS setting was not changed; initial automatic theme selection was exercised, while the existing live OS-change listener remains code-reviewed evidence.
 
-All prototype code remains disposable and outside `web/` and `internal/`. q2–q5 are answered: layout A, inspector content/interactions, dedicated Install page, and both themes with automatic switching. Review of the visual refinement requested in q2 is the remaining task requirement. No Rosemary gate has been raised or claimed, following the operator's instruction.
-
-The lane was rebased on `origin/main` at `70856c1`. The dependency-document overlap was resolved by retaining main's Go/Twilio records and appending the scoped Svelte audit. The refined build passed after the rebase.
+The lane remains based on `origin/main` at `70856c1`. The earlier dependency-document overlap preserves main’s Go/Twilio records and the scoped Svelte audit. There is no Rosemary gate, following Marek’s instruction. The revised message screen needs operator acceptance before the designer handoff is complete; prior Install and theme decisions do not need to be asked again.
