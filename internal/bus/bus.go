@@ -61,6 +61,9 @@ func (b *Bus) Subscribe(ctx context.Context) <-chan core.Event {
 			close(sub.out)
 		}()
 		for {
+			if ctx.Err() != nil {
+				return
+			}
 			sub.mu.Lock()
 			var e core.Event
 			available := sub.head < len(sub.queue)
@@ -70,6 +73,13 @@ func (b *Bus) Subscribe(ctx context.Context) <-chan core.Event {
 				sub.head++
 				if sub.head == len(sub.queue) {
 					sub.queue = nil
+					sub.head = 0
+				} else if sub.head >= 1024 && sub.head >= len(sub.queue)/2 {
+					// Reuse consumed space even when a steady stream never lets
+					// the queue empty; memory follows backlog, not lifetime traffic.
+					remaining := copy(sub.queue, sub.queue[sub.head:])
+					clear(sub.queue[remaining:])
+					sub.queue = sub.queue[:remaining]
 					sub.head = 0
 				}
 			}
