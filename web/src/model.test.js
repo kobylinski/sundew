@@ -87,3 +87,21 @@ test('failed deletion retains rows; success accepts 204 without JSON; all delete
     assert.equal(urls[1][0], '/api/v1/messages'); assert.equal(urls[1][1].method, 'DELETE');
   } finally { c.stop(); }
 });
+test('superseding a page cancels its request and releases its stream buffer', async () => {
+  const page = deferred(); let signal;
+  const { client: c } = client(async (url, options) => {
+    if (url.includes('cursor=')) { signal = options.signal; return page.promise; }
+    return response({ items: [], next_cursor: '' });
+  });
+  try {
+    c.emit({ loading: false, loaded: true, cursor: 'old-page' });
+    const more = c.more(); c.setFilters({ q: 'new' });
+    assert.equal(signal.aborted, true);
+    page.resolve(response({ items: [message('stale')], next_cursor: '' })); await more;
+    for (let i = 0; i < 100; i++) c.event({ type: 'message.updated', message: message('active', { body: 'new '+i }) });
+    assert.equal(c.pageEvents, null, 'no abandoned page retains future stream events');
+    assert.deepEqual(c.state.items.map(m => m.id), ['active']);
+    c.emit({ loading: false, cursor: 'stop-page' }); const stopped = c.more(); c.stop();
+    assert.equal(signal.aborted, true); assert.equal(c.pageEvents, null); await stopped;
+  } finally { c.stop(); }
+});

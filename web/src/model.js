@@ -71,7 +71,8 @@ export class InboxClient {
   stop() {
     this.running = false; this.generation++; this.detailGeneration++;
     clearTimeout(this.retryTimer); clearTimeout(this.searchTimer);
-    this.source?.close(); this.listAbort?.abort(); this.phoneAbort?.abort(); this.detailAbort?.abort();
+    this.source?.close(); this.listAbort?.abort(); this.pageAbort?.abort(); this.phoneAbort?.abort(); this.detailAbort?.abort();
+    this.buffer = null; this.pageEvents = null;
     this.emit({ connection: 'disconnected' });
   }
   connect() {
@@ -112,7 +113,7 @@ export class InboxClient {
     if (event.type === 'message.created') this.notice(this.state.pending.length ? this.state.pending.length + ' new messages waiting.' : 'New message caught.');
   }
   setFilters(filters) {
-    clearTimeout(this.searchTimer); this.listAbort?.abort(); this.phoneAbort?.abort();
+    clearTimeout(this.searchTimer); this.listAbort?.abort(); this.pageAbort?.abort(); this.phoneAbort?.abort(); this.pageEvents = null;
     this.generation++; this.buffer = null; this.detailGeneration++; this.detailAbort?.abort();
     this.emit({ filters, selectedId: '', selected: null, pending: [], cursor: '', phones: [] });
     this.searchTimer = setTimeout(() => { this.refresh(false); this.loadPhones(); }, 200);
@@ -127,7 +128,7 @@ export class InboxClient {
     } catch { /* List error is surfaced by refresh; autocomplete stays optional. */ }
   }
   async refresh(preserve = true) {
-    clearTimeout(this.searchTimer); this.listAbort?.abort();
+    clearTimeout(this.searchTimer); this.listAbort?.abort(); this.pageAbort?.abort(); this.pageEvents = null;
     const abort = new AbortController(); this.listAbort = abort;
     const version = ++this.generation; const before = this.state;
     const target = preserve ? Math.max(50, before.items.length + before.pending.length) : 50;
@@ -158,16 +159,21 @@ export class InboxClient {
     if (!this.state.cursor || this.state.loading) return;
     const version = this.generation; const cursor = this.state.cursor;
     const pageEvents = []; this.pageEvents = pageEvents;
+    const abort = new AbortController(); this.pageAbort = abort;
     this.emit({ loading: true });
     try {
-      const page = await this.request(listURL(this.state.filters, cursor));
+      const page = await this.request(listURL(this.state.filters, cursor), { signal: abort.signal });
       // Do not resurrect deletions/updates while a page is in flight.
-      if (version !== this.generation || !this.running) return;
+      if (version !== this.generation || abort.signal.aborted || !this.running) return;
       this.pageEvents = null;
       this.state = { ...this.state, items: sorted([...this.state.items, ...(page.items ?? []).map(normalize)]), cursor: page.next_cursor || '', loading: false, error: '' };
       for (const event of pageEvents) this.state = reconcile(this.state, event, this.away());
       this.emit();
-    } catch (error) { if (version === this.generation && this.running) { this.pageEvents = null; this.emit({ loading: false, error: error.message }); } }
+    } catch (error) { if (version === this.generation && !abort.signal.aborted && this.running) this.emit({ loading: false, error: error.message }); }
+    finally {
+      if (this.pageEvents === pageEvents) this.pageEvents = null;
+      if (this.pageAbort === abort) this.pageAbort = null;
+    }
   }
   async select(id) {
     this.detailAbort?.abort(); const abort = new AbortController(); this.detailAbort = abort;
@@ -191,7 +197,7 @@ export class InboxClient {
     try {
       await this.request(apiRoot + (target === 'all' ? '' : '/' + encodeURIComponent(target.id)), { method: 'DELETE' });
       // Abort snapshots taken before deletion; the stream may already have arrived.
-      this.generation++; this.listAbort?.abort(); const buffered = this.buffer ?? []; this.buffer = null;
+      this.generation++; this.listAbort?.abort(); this.pageAbort?.abort(); this.pageEvents = null; const buffered = this.buffer ?? []; this.buffer = null;
       for (const event of buffered) this.event(event);
       this.event(target === 'all' ? { type: 'store.reset' } : { type: 'message.deleted', message: target });
       this.emit({ deleting: false, loading: false }); return true;
