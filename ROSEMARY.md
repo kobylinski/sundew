@@ -51,5 +51,10 @@ push; a release is a tagged image.
 `explain` (a question about the brief) and `decide` (a choice the brief does not settle) go to the
 Integrator; what only the operator can answer becomes an operator question on the task.
 
+Questions to the operator go only through Rosemary, as an operator question on the task
+(`operator(action="question")`), one decision per question. He does not answer questions asked in
+an agent's own harness; do not wait for him there, and carry on with what does not depend on the
+answer.
+
 Where Rosemary refuses something a contract asks for, report the refusal in its own words; do not
 work around it.
