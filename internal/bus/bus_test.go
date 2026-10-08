@@ -132,3 +132,48 @@ func TestConcurrentSubscribeCancelPublish(t *testing.T) {
 		t.Fatal("already-canceled context subscribed")
 	}
 }
+
+func TestConcurrentPublishersHaveOneCompleteOrderForAllSubscribers(t *testing.T) {
+	b := bus.New()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	a, c := b.Subscribe(ctx), b.Subscribe(ctx)
+	var wg sync.WaitGroup
+	for publisher := range 8 {
+		wg.Go(func() {
+			for index := range 100 {
+				b.Publish(core.Event{Type: fmt.Sprintf("%d/%d", publisher, index)})
+			}
+		})
+	}
+	wg.Wait()
+	deadline := time.After(3 * time.Second)
+	seen := map[string]bool{}
+	for index := range 800 {
+		var first, second core.Event
+		select {
+		case first = <-a:
+		case <-deadline:
+			t.Fatalf("first subscriber lost event %d", index)
+		}
+		select {
+		case second = <-c:
+		case <-deadline:
+			t.Fatalf("second subscriber lost event %d", index)
+		}
+		if first.Type != second.Type {
+			t.Fatalf("publication order differs at %d: %q / %q", index, first.Type, second.Type)
+		}
+		if seen[first.Type] {
+			t.Fatalf("duplicate event %q", first.Type)
+		}
+		seen[first.Type] = true
+	}
+	for publisher := range 8 {
+		for index := range 100 {
+			if !seen[fmt.Sprintf("%d/%d", publisher, index)] {
+				t.Fatal("missing published event")
+			}
+		}
+	}
+}
