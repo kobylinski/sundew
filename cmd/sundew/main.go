@@ -15,6 +15,7 @@ import (
 	"github.com/kobylinski/sundew/internal/bus"
 	"github.com/kobylinski/sundew/internal/config"
 	"github.com/kobylinski/sundew/internal/core"
+	"github.com/kobylinski/sundew/internal/provider/twilio"
 	"github.com/kobylinski/sundew/internal/server"
 	"github.com/kobylinski/sundew/internal/store"
 )
@@ -36,8 +37,10 @@ func run() error {
 	events := bus.New()
 	db := store.New(events)
 	deps := core.Deps{Config: cfg, Store: db, Bus: events, Providers: make(map[string]core.Provider), Now: time.Now}
+	deps.Providers["twilio"] = twilio.New(cfg)
 	registrations := []func(*http.ServeMux, core.Deps){
 		// registrations:
+		deps.Providers["twilio"].Register,
 		// end registrations
 	}
 	handler := server.New(deps, registrations)
