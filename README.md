@@ -23,11 +23,10 @@ Messages are kept in memory for the life of the process. See the
 
 ## Run it
 
-Run a published version (replace `<namespace>` and `<version>` with the Docker Hub
-repository and release version configured by your operator):
+Run a published version from Docker Hub (replace `<version>` with a release version):
 
 ```sh
-docker run --rm -p 8025:8025 <namespace>/sundew:<version>
+docker run --rm -p 8025:8025 kobylinski/sundew:<version>
 curl http://localhost:8025/healthz
 ```
 
@@ -36,7 +35,7 @@ For an application using Compose:
 ```yaml
 services:
   sundew:
-    image: <namespace>/sundew:<version>
+    image: kobylinski/sundew:<version>
     ports:
       - "8025:8025"
   app:

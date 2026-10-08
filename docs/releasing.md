@@ -6,12 +6,12 @@ Images support `linux/amd64` and `linux/arm64` and contain one static binary.
 
 ## Set up once
 
-Create the Docker Hub repository you want to publish to. In the GitHub repository,
+Use the operator-selected Docker Hub repository `kobylinski/sundew`. In the GitHub repository,
 open **Settings → Secrets and variables → Actions** and set these three values:
 
 | Tab | Name | Value |
 | --- | --- | --- |
-| Variables | `DOCKERHUB_IMAGE` | `<namespace>/sundew`, without a registry prefix or tag |
+| Variables | `DOCKERHUB_IMAGE` | `kobylinski/sundew`, without a registry prefix or tag |
 | Secrets | `DOCKERHUB_USERNAME` | Docker Hub login with write access to that repository |
 | Secrets | `DOCKERHUB_TOKEN` | A Docker Hub personal access token for that login with **Read & Write** access; Delete is unnecessary |
 
@@ -22,7 +22,7 @@ setting is missing, naming the missing setting without printing its value.
 
 After the workflow is on the default branch and the settings exist, run the first
 verification yourself: **Actions → Release image → Run workflow**, select `main`,
-and leave `dry_run` checked. This runs vet, race tests, tag-logic tests, all seven
+and leave `dry_run` checked. This runs vet, race tests, tag-logic tests, all eight
 container acceptance steps, and the two-platform build. It never logs in or pushes.
 For a tag's exact candidate, select that tag instead of `main`. A branch dry run
 embeds `dev`; a tag dry run embeds the validated version without `v`.
@@ -65,11 +65,11 @@ Each published image carries OCI labels `org.opencontainers.image.source`,
 `revision`, `version`, `licenses` (`MIT`) and `created` (UTC build time).
 The version is compiled into the binary and included in the listening log.
 
-Check a published image, replacing both placeholders:
+Check a published image, replacing `<version>` with its release version:
 
 ```sh
-docker run --rm <namespace>/sundew:<version> --version
-docker run --rm -p 8025:8025 <namespace>/sundew:<version>
+docker run --rm kobylinski/sundew:<version> --version
+docker run --rm -p 8025:8025 kobylinski/sundew:<version>
 ```
 
 `--version` prints only the version and exits before reading configuration or

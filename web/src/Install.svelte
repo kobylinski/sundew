@@ -46,7 +46,7 @@
       <span class="step-number">01</span>
       <div class="step-content">
         <h2>Run Sundew</h2>
-        <p>Replace <code>&lt;namespace&gt;</code> with your Docker Hub namespace and <code>&lt;version&gt;</code> with a release tag. Open <code>http://localhost:8025</code> to see your messages.</p>
+        <p>Replace <code>&lt;version&gt;</code> with a release tag. Open <code>http://localhost:8025</code> to see your messages.</p>
         <div class="code-toolbar">
           <div class="format-switch" aria-label="Run example">
             <button class:active={format === 'docker'} aria-pressed={format === 'docker'} onclick={() => format = 'docker'}>Docker</button>

@@ -102,7 +102,8 @@ The setup-node repository's latest commit was checked through the official GitHu
 [`949feb2`](https://github.com/actions/setup-node/commit/949feb2413d6458794dcd2491c4babbbce0c15c1),
 2026-10-08, within six months.
 
-The twelve older transitive packages remain explicitly listed above. The production exception
-is pending the operator's answer through the Integrator on `tasks:4f6ecdb55a9238e9`; the
-prototype exception does not authorize production integration. The task permits implementation
-with this pinned set while that decision is pending, and `build` must wait for approval.
+The twelve older transitive packages remain explicitly listed above with their last upstream
+commit. Marek approved this pinned set for production on **2026-10-08 at 15:38 UTC**, answering
+`tasks:4f6ecdb55a9238e9#q1` with `extend_to_production`. The six-month rule applies to packages
+we choose directly; these older transitive packages are documented exceptions. The earlier
+prototype-only approval remains recorded separately above.
