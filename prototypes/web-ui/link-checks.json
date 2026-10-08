@@ -1,0 +1,81 @@
+{
+  "date": "2026-10-08",
+  "revision": "c15 content links with c17 rendering requirements",
+  "checks": [
+    {
+      "name": "Mixed body links only HTTP URL in list and report",
+      "passed": true,
+      "detail": {
+        "allBlank": true,
+        "bodyLinks": 1,
+        "bodyText": "Track your parcel at https://example.test/track/6021.\nPlain text: javascript:alert(1)\nHTML fragment: <img src=x onerror=alert(1)>",
+        "callbackLinks": 0,
+        "htmlElements": 0,
+        "mediaLinks": 1,
+        "rowLinks": 1,
+        "unsafeLinks": 0
+      }
+    },
+    {
+      "name": "Body and metadata links use protected new tabs",
+      "passed": true
+    },
+    {
+      "name": "Unsafe callback and media values remain text",
+      "passed": true
+    },
+    {
+      "name": "No anchor is nested inside a row button",
+      "passed": true
+    },
+    {
+      "name": "Clicking a body URL opens a separate tab",
+      "passed": true,
+      "detail": "https://example.test/track/6021"
+    },
+    {
+      "name": "Link click does not open the row inspector action",
+      "passed": true
+    },
+    {
+      "name": "Row still opens the report and focuses its heading",
+      "passed": true
+    },
+    {
+      "name": "Ordinary callback becomes an HTTP link",
+      "passed": true
+    },
+    {
+      "name": "Search highlights inside clickable URL",
+      "passed": true
+    },
+    {
+      "name": "Raw report stays literal and row Raw still jumps",
+      "passed": true
+    },
+    {
+      "name": "Copy text preserves original content and markup characters",
+      "passed": true
+    },
+    {
+      "name": "Linked content wraps on phone without overflow",
+      "passed": true
+    },
+    {
+      "name": "Closing linked report returns focus to row button",
+      "passed": true
+    },
+    {
+      "name": "Row link is reachable with keyboard separately from row action",
+      "passed": true
+    },
+    {
+      "name": "Static build exposes safe content links and literal HTML",
+      "passed": true
+    },
+    {
+      "name": "Fresh static build has no browser errors",
+      "passed": true
+    }
+  ]
+}

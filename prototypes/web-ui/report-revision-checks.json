@@ -1,0 +1,147 @@
+{
+  "date": "2026-10-08",
+  "revision": "q6 continuous report and phone autocomplete",
+  "checks": [
+    {
+      "name": "Desktop report and search geometry",
+      "passed": true,
+      "detail": {
+        "bodyFont": "14px",
+        "card": "0px",
+        "footer": 0,
+        "internalScroll": false,
+        "list": 528.2734375,
+        "search": 528.2734375,
+        "tabs": 0
+      }
+    },
+    {
+      "name": "One message delete action",
+      "passed": true
+    },
+    {
+      "name": "Phone ArrowUp starts at last suggestion",
+      "passed": true
+    },
+    {
+      "name": "Exact From filter selects inbound message",
+      "passed": true
+    },
+    {
+      "name": "Pointer selection applies exact To filter",
+      "passed": true
+    },
+    {
+      "name": "Text search combines with selected phone",
+      "passed": true
+    },
+    {
+      "name": "Escape closes autocomplete without clearing query",
+      "passed": true
+    },
+    {
+      "name": "Clear filters restores all messages",
+      "passed": true
+    },
+    {
+      "name": "Raw action jumps within a complete report",
+      "passed": true
+    },
+    {
+      "name": "Request clipboard preserves displayed exchange",
+      "passed": true
+    },
+    {
+      "name": "Response clipboard preserves displayed exchange",
+      "passed": true
+    },
+    {
+      "name": "Only message tools opens scoped delete with Cancel focus",
+      "passed": true
+    },
+    {
+      "name": "Cancel preserves all rows",
+      "passed": true
+    },
+    {
+      "name": "Delete one preserves exact phone filter and next match",
+      "passed": true
+    },
+    {
+      "name": "Delete all clears hidden messages too",
+      "passed": true
+    },
+    {
+      "name": "Tablet report uses document scrolling without overflow",
+      "passed": true
+    },
+    {
+      "name": "Phone search aligns with list",
+      "passed": true
+    },
+    {
+      "name": "Phone complete report has no overflow or inner scrolling",
+      "passed": true
+    },
+    {
+      "name": "Phone report returns focus to its row",
+      "passed": true
+    },
+    {
+      "name": "Phone Raw opens report at request heading",
+      "passed": true
+    },
+    {
+      "name": "Phone ArrowDown and Enter choose recipient",
+      "passed": true
+    },
+    {
+      "name": "Inbound report shows both missing exchange states",
+      "passed": true
+    },
+    {
+      "name": "Failure remains readable in report",
+      "passed": true
+    },
+    {
+      "name": "Long phone report wraps raw and message text",
+      "passed": true
+    },
+    {
+      "name": "Recovery remains usable after report revision",
+      "passed": true
+    },
+    {
+      "name": "Phone filter reload selects a matching report",
+      "passed": true
+    },
+    {
+      "name": "Arrival outside phone filter preserves selected report",
+      "passed": true
+    },
+    {
+      "name": "Paging still starts with 50 matching rows",
+      "passed": true
+    },
+    {
+      "name": "Paging adds next 50 with document scrolling",
+      "passed": true
+    },
+    {
+      "name": "Scrolled arrival waits without inserting rows",
+      "passed": true
+    },
+    {
+      "name": "Show newest inserts staged arrival and restores heading focus",
+      "passed": true
+    },
+    {
+      "name": "Static build renders revised report without preview controls",
+      "passed": true
+    },
+    {
+      "name": "Automatic theme follows current OS preference",
+      "passed": true
+    }
+  ]
+}

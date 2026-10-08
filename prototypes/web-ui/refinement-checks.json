@@ -1,0 +1,59 @@
+{
+  "date": "2026-10-08",
+  "browser": "Chrome",
+  "checks": [
+    {
+      "check": "Refined raw request copies exact visible exchange after Copied confirmation",
+      "pass": true,
+      "note": "The first check read the clipboard before the asynchronous write completed; the confirmed recheck matched all 413 characters."
+    },
+    {
+      "check": "Refined tab navigation selects Response",
+      "pass": true
+    },
+    {
+      "check": "Revised phone installation has no horizontal overflow",
+      "pass": true
+    },
+    {
+      "check": "Dark review override applies",
+      "pass": true
+    },
+    {
+      "check": "System mode restores the current OS preference",
+      "pass": true
+    },
+    {
+      "check": "empty phone state fits viewport",
+      "pass": true
+    },
+    {
+      "check": "loading phone state fits viewport",
+      "pass": true
+    },
+    {
+      "check": "offline phone state fits viewport",
+      "pass": true
+    },
+    {
+      "check": "long phone state fits viewport",
+      "pass": true
+    },
+    {
+      "check": "Search remains functional after row restructuring",
+      "pass": true
+    },
+    {
+      "check": "Refined delete confirmation still focuses Cancel",
+      "pass": true
+    },
+    {
+      "check": "Revised scrolling panes retain staged arrivals",
+      "pass": true
+    },
+    {
+      "check": "Default review opens the selected layout without controls",
+      "pass": true
+    }
+  ]
+}

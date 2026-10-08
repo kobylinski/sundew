@@ -1,0 +1,131 @@
+{
+  "date": "2026-10-08",
+  "browser": "Chrome",
+  "data": "fictional fixtures, no backend",
+  "checks": [
+    {
+      "check": "Search recipient and sender",
+      "rows": 2
+    },
+    {
+      "check": "Case-insensitive body search",
+      "rows": 1
+    },
+    {
+      "check": "Account search",
+      "rows": 1
+    },
+    {
+      "check": "No-results state",
+      "visible": true
+    },
+    {
+      "check": "Raw request copy",
+      "matches": true
+    },
+    {
+      "check": "Arrow-key tab navigation",
+      "selected": "true",
+      "focused": "Response"
+    },
+    {
+      "check": "Raw response copy",
+      "matches": true
+    },
+    {
+      "check": "Delete confirmation defaults to Cancel",
+      "focused": "Cancel"
+    },
+    {
+      "check": "Escape cancels deletion",
+      "rows": 2,
+      "dialogOpen": 0
+    },
+    {
+      "check": "Delete one while filtered",
+      "rows": 1,
+      "focus": "messages-heading"
+    },
+    {
+      "check": "Delete all includes filtered-out messages",
+      "empty": true,
+      "rows": 0
+    },
+    {
+      "check": "Open detail focuses heading; close returns to matching row",
+      "pass": true
+    },
+    {
+      "check": "Install Docker command copy is exact",
+      "pass": true
+    },
+    {
+      "check": "Copy feedback resets when source changes",
+      "pass": true
+    },
+    {
+      "check": "Install Compose copy is exact",
+      "pass": true
+    },
+    {
+      "check": "B opens standalone detail",
+      "pass": true
+    },
+    {
+      "check": "C opens raw request inline",
+      "pass": true
+    },
+    {
+      "check": "Disconnected retry restores mock inbox",
+      "pass": true
+    },
+    {
+      "check": "Inbound without exchange has explicit request empty state",
+      "pass": true
+    },
+    {
+      "check": "Many-message state initially loads 50 rows",
+      "pass": true
+    },
+    {
+      "check": "Load 50 more preserves previous rows and adds 50",
+      "pass": true
+    },
+    {
+      "check": "Scrolled arrival is staged behind Show newest",
+      "pass": true
+    },
+    {
+      "check": "Arrival at top adds row and preserves selected inspector",
+      "pass": true
+    },
+    {
+      "check": "Show newest returns to top with stable keyboard focus",
+      "pass": true
+    },
+    {
+      "check": "Slash focuses search",
+      "pass": true
+    },
+    {
+      "check": "Escape clears search while keeping input focus",
+      "pass": true
+    },
+    {
+      "check": "Retry returns keyboard focus to inbox heading",
+      "pass": true
+    },
+    {
+      "check": "Production build renders inbox without prototype controls",
+      "pass": true
+    },
+    {
+      "check": "Next-layout control changes A to B",
+      "pass": true
+    },
+    {
+      "check": "Layout arrows do not intercept search input",
+      "pass": true
+    }
+  ]
+}
