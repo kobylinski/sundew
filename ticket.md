@@ -4,9 +4,9 @@ assignees:
 created_at: 2026-10-08T03:37:43.387908+00:00
 id: 40a0d78a850976e8
 labels: []
-status: in_progress
+status: done
 title: 'Design the web UI: message review and install information (Svelte prototype)'
-updated_at: 2026-10-08T03:37:54.313072+00:00
+updated_at: 2026-10-08T06:26:45.956064+00:00
 ---
 ## Outcome
 
