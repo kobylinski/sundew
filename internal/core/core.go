@@ -127,7 +127,9 @@ type Event struct {
 }
 
 // Bus fans store events out to subscribers (the stream endpoint, the callback
-// engine). Publish never blocks; a subscriber that falls behind loses events.
+// engine). Publish never blocks and no event is dropped: each subscriber has
+// its own unbounded queue and receives every event published after it
+// subscribed, in publication order, until its context is done.
 type Bus interface {
 	Publish(e Event)
 	// Subscribe delivers events published after the call until ctx is done,
