@@ -37,7 +37,7 @@ while True:
 stream.close()
 status, latest = call("GET", "/api/v1/messages/latest?to=%2B15550000002")
 assert status == 200 and latest["body"] == "acceptance code 123456"
-status, page = call("GET", "/api/v1/messages?provider=twilio&body=CODE&limit=1")
+status, page = call("GET", "/api/v1/messages?provider=twilio&body=CODE&q=123456&limit=1")
 assert status == 200 and [m["id"] for m in page["items"]] == [latest["id"]]
 assert "next_cursor" in page
 assert call("GET", "/api/v1/messages/" + latest["id"])[1]["id"] == latest["id"]

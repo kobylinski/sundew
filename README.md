@@ -72,7 +72,8 @@ curl 'http://localhost:8025/api/v1/messages/latest?to=%2B15551234567'
 ```
 
 `GET /api/v1/messages` returns `{"items":[…],"next_cursor":"…"}`, newest first.
-Filters `to`, `from`, `account` and `provider` match exactly; `body` is a
+`q` searches to/from/body/account with a case-insensitive substring. Filters combine
+with AND. Filters `to`, `from`, `account` and `provider` match exactly; `body` is a
 case-insensitive substring; `since` is an inclusive RFC 3339 bound on `created_at`.
 Use `limit` (1–500, default 50) and the returned `next_cursor` as `cursor` for the
 next page. URL-encode phone numbers so `+` becomes `%2B`. Read a message by its

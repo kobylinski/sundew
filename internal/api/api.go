@@ -98,7 +98,7 @@ func parseFilter(r *http.Request) (core.Filter, error) {
 	if err != nil {
 		return core.Filter{}, fmt.Errorf("invalid query encoding")
 	}
-	f := core.Filter{To: q.Get("to"), From: q.Get("from"), BodyContains: q.Get("body"), Account: q.Get("account"), Provider: q.Get("provider"), Cursor: q.Get("cursor")}
+	f := core.Filter{Query: q.Get("q"), To: q.Get("to"), From: q.Get("from"), BodyContains: q.Get("body"), Account: q.Get("account"), Provider: q.Get("provider"), Cursor: q.Get("cursor")}
 	if q.Has("since") {
 		f.Since, err = time.Parse(time.RFC3339Nano, q.Get("since"))
 		if err != nil {
@@ -170,8 +170,18 @@ func (a *api) reset(w http.ResponseWriter, r *http.Request) {
 }
 
 func matches(m *core.Message, f core.Filter) bool {
-	return m != nil && (f.To == "" || m.To == f.To) && (f.From == "" || m.From == f.From) && (f.Account == "" || m.Account == f.Account) && (f.Provider == "" || m.Provider == f.Provider) && (f.BodyContains == "" || strings.Contains(strings.ToLower(m.Body), strings.ToLower(f.BodyContains))) && (f.Since.IsZero() || !m.CreatedAt.Before(f.Since))
+	return m != nil && matchesQuery(m, f.Query) && (f.To == "" || m.To == f.To) && (f.From == "" || m.From == f.From) && (f.Account == "" || m.Account == f.Account) && (f.Provider == "" || m.Provider == f.Provider) && (f.BodyContains == "" || strings.Contains(strings.ToLower(m.Body), strings.ToLower(f.BodyContains))) && (f.Since.IsZero() || !m.CreatedAt.Before(f.Since))
 }
+func matchesQuery(m *core.Message, query string) bool {
+	query = strings.ToLower(query)
+	for _, value := range []string{m.To, m.From, m.Body, m.Account} {
+		if strings.Contains(strings.ToLower(value), query) {
+			return true
+		}
+	}
+	return false
+}
+
 func (a *api) stream(w http.ResponseWriter, r *http.Request) {
 	f, err := parseFilter(r)
 	if err != nil {

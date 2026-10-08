@@ -72,10 +72,12 @@ func (a *api) document() map[string]any {
 			parameters = append(parameters, map[string]any{"name": "id", "in": "path", "required": true, "schema": map[string]any{"type": "string"}})
 		}
 		if e.method == "GET" && (e.path == "/api/v1/messages" || strings.HasSuffix(e.path, "/latest") || strings.HasSuffix(e.path, "/stream")) {
-			for _, name := range []string{"to", "from", "body", "account", "provider", "since", "limit", "cursor"} {
+			for _, name := range []string{"q", "to", "from", "body", "account", "provider", "since", "limit", "cursor"} {
 				s := map[string]any{"type": "string"}
 				description := "Exact match"
 				switch name {
+				case "q":
+					description = "Case-insensitive substring in any of to, from, body or account; combines with other filters using AND"
 				case "since":
 					s["format"] = "date-time"
 					description = "Inclusive lower bound on created_at (RFC 3339)"

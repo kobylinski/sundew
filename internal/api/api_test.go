@@ -94,14 +94,18 @@ func TestFilterForwardingAndPaging(t *testing.T) {
 		name string
 		want core.Filter
 	}{
+		{"q", core.Filter{Query: "search term"}},
 		{"to", core.Filter{To: "+15550001"}}, {"from", core.Filter{From: "+15550002"}}, {"body", core.Filter{BodyContains: "VeRiFy code"}},
 		{"account", core.Filter{Account: "invented-account"}}, {"provider", core.Filter{Provider: "twilio"}}, {"since", core.Filter{Since: since}},
-		{"combined", core.Filter{To: "+15550001", From: "+15550002", BodyContains: "Code", Account: "invented-account", Provider: "twilio", Since: since, Limit: 2, Cursor: "opaque-next"}},
+		{"combined", core.Filter{Query: "Code", To: "+15550001", From: "+15550002", BodyContains: "Code", Account: "invented-account", Provider: "twilio", Since: since, Limit: 2, Cursor: "opaque-next"}},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			q := url.Values{}
 			f := tc.want
+			if f.Query != "" {
+				q.Set("q", f.Query)
+			}
 			if f.To != "" {
 				q.Set("to", f.To)
 			}
@@ -397,7 +401,7 @@ func TestStreamMatching(t *testing.T) {
 	if !matches(m, f) {
 		t.Fatal("combined match rejected")
 	}
-	for _, bad := range []core.Filter{{To: "x"}, {From: "x"}, {Account: "x"}, {Provider: "x"}, {BodyContains: "x"}, {Since: m.CreatedAt.Add(time.Nanosecond)}} {
+	for _, bad := range []core.Filter{{Query: "no match"}, {To: "x"}, {From: "x"}, {Account: "x"}, {Provider: "x"}, {BodyContains: "x"}, {Since: m.CreatedAt.Add(time.Nanosecond)}} {
 		if matches(m, bad) {
 			t.Errorf("matched %+v", bad)
 		}
@@ -469,5 +473,20 @@ func TestInvalidStoreFilterIsBadRequest(t *testing.T) {
 		if !strings.Contains(r.Body.String(), `"code":"invalid_filter"`) {
 			t.Fatal(r.Body)
 		}
+	}
+}
+
+func TestQueryMatchesAnySearchFieldAndCombinesWithFilters(t *testing.T) {
+	m := &core.Message{To: "+15551234", From: "Sender", Body: "Your CODE", Account: "Example account"}
+	for _, query := range []string{"555", "senDER", "code", "EXAMPLE", ""} {
+		if !matches(m, core.Filter{Query: query}) {
+			t.Errorf("query %q did not match", query)
+		}
+	}
+	if matches(m, core.Filter{Query: "code", To: "different"}) {
+		t.Fatal("query did not combine with exact filter using AND")
+	}
+	if matches(m, core.Filter{Query: "missing"}) {
+		t.Fatal("unmatched query accepted")
 	}
 }
