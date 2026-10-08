@@ -70,7 +70,7 @@ def call(host, method, path, form=None):
           headers={'Content-Type': 'application/x-www-form-urlencoded', 'Authorization': auth})
     with urllib.request.urlopen(req, timeout=15) as response:
         payload = response.read()
-        return json.loads(payload) if payload else None
+        return json.loads(payload) if payload and response.headers.get_content_type() == 'application/json' else payload
 
 def ready(host, path):
     deadline = time.monotonic() + 15
