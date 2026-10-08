@@ -1,0 +1,16 @@
+{
+  "name": "sundew-web",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 4281 --strictPort",
+    "build": "node build.js",
+    "test": "node --test src/*.test.js"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "7.3.1",
+    "svelte": "5.57.2",
+    "vite": "8.3.3"
+  }
+}

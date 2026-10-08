@@ -84,3 +84,20 @@ All versions are pinned by `prototypes/web-ui/package-lock.json`. Nothing instal
 Maintenance is checked against repository activity, not npm publish dates. This table records every package in the lockfile, including optional native packages and both locked versions of `magic-string`.
 
 No implementation dependency is approved solely by being present in this prototype. The eventual application task must apply the dependency policy agreed by the operator.
+
+## Production Svelte UI
+
+Checked on **2026-10-08** for `web/`. The production lockfile is identical to the prototype's
+lockfile apart from the root package name (verified by parsed JSON comparison). The complete
+version/platform package table above therefore also enumerates the production set, with the
+same cited maintenance evidence. Direct dependencies remain `svelte@5.57.2`,
+`@sveltejs/vite-plugin-svelte@7.3.1`, and `vite@8.3.3`; their cited upstream commits were
+rechecked on this date. No test dependency is added: tests use Node's built-in runner.
+`npm ci` reports zero known vulnerabilities. Only compiled JS/CSS ships in the Go binary;
+Node and build modules are absent from the scratch runtime. Build infrastructure adds the
+official `node:24-alpine` stage and `actions/setup-node@v4`.
+
+The twelve older transitive packages remain explicitly listed above. The production exception
+is pending the operator's answer through the Integrator on `tasks:4f6ecdb55a9238e9`; the
+prototype exception does not authorize production integration. The task permits implementation
+with this pinned set while that decision is pending, and `build` must wait for approval.

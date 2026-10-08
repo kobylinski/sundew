@@ -4,3 +4,7 @@
 .claude
 node_modules
 **/node_modules
+
+internal/ui/static/assets
+internal/ui/static/index.html
+internal/ui/dist

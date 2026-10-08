@@ -20,6 +20,7 @@ import (
 	"github.com/kobylinski/sundew/internal/provider/twilio"
 	"github.com/kobylinski/sundew/internal/server"
 	"github.com/kobylinski/sundew/internal/store"
+	"github.com/kobylinski/sundew/internal/ui"
 )
 
 var version = "dev"
@@ -50,6 +51,7 @@ func run() error {
 		// registrations:
 		deps.Providers["twilio"].Register,
 		api.Register,
+		ui.Register,
 		// end registrations
 	}
 	stopCallbacks := callback.Start(ctx, deps)
