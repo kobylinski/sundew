@@ -7,7 +7,7 @@ probe="${SUNDEW_TEST_PROJECT}-health"
 
 # Arm the probe BEFORE the application starts. Measure on the Docker host's
 # clock against State.StartedAt, excluding client startup and CLI/SSH latency.
-compose run -d -T --name "$probe" client python -u -c '
+compose run -d -T --name "$probe" -e "SUNDEW_TEST_URL=http://${SUNDEW_TEST_SERVER_IP}:8025" client python -u -c '
 import os, time, urllib.request
 print("armed", flush=True)
 deadline = time.monotonic() + 30
